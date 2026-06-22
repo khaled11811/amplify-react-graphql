@@ -5,9 +5,7 @@
 export type UserRole = "admin" | "store_manager";
 
 export type OrderStatus =
-  | "pending"
   | "paid"
-  | "processing"
   | "shipped"
   | "completed"
   | "cancelled";
@@ -20,9 +18,11 @@ export type TransactionStatus =
 
 export type StoreStatus = "active" | "suspended";
 
+export type StoreType = "paid_shop" | "display_shop";
+
 export type StoreBackgroundType = "none" | "color" | "preset" | "image";
 
-export type StoreFont = "sans" | "serif" | "rounded";
+export type StoreFont = "sans" | "serif" | "rounded" | "tajawal" | "cairo" | "amiri";
 
 export type BillingInfo = {
   account_holder?: string;
@@ -64,10 +64,15 @@ export type Store = {
   background_type: StoreBackgroundType;
   background_value: string | null;
   font: StoreFont;
+  store_language: string;
+  store_type: StoreType;
+  subscription_type: string;
+  currency: string;
   billing_info: BillingInfo;
   contact_info: ContactInfo;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 };
 
 export type Category = {
@@ -149,6 +154,31 @@ export type Payout = {
   paid_at: string | null;
 };
 
+export type AppSetting = {
+  key: string;
+  value: string;
+  updated_at: string | null;
+};
+
+export type PendingSignup = {
+  id: string;
+  store_name: string;
+  store_slug: string;
+  store_type: string;
+  manager_name: string | null;
+  manager_email: string;
+  manager_password: string;
+  created_at: string | null;
+  processed_at: string | null;
+};
+
+export type SubscriptionPayment = {
+  id: string;
+  store_id: string | null;
+  amount_aed: number;
+  paid_at: string;
+};
+
 // Supabase-generated `Database` type shape, kept minimal until
 // `supabase gen types` is run against the real project.
 type Table<Row> = {
@@ -170,6 +200,9 @@ export type Database = {
       order_items: Table<OrderItem>;
       transactions: Table<Transaction>;
       payouts: Table<Payout>;
+      app_settings: Table<AppSetting>;
+      pending_signups: Table<PendingSignup>;
+      subscription_payments: Table<SubscriptionPayment>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

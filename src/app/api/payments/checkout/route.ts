@@ -55,57 +55,21 @@ export async function POST(request: Request) {
     }
   }
 
-  const currency = products[0]?.currency ?? "usd";
-  const totalAmount = items.reduce((sum, item) => {
-    const product = productById.get(item.productId)!;
-    return sum + product.price * item.quantity;
-  }, 0);
-
-  const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .insert({
-      store_id: store.id,
-      customer_name: customer.name,
-      customer_email: customer.email,
-      customer_phone: customer.phone || null,
-      shipping_address: customer.address || null,
-      status: "pending",
-      total_amount: totalAmount,
-      currency,
-    })
-    .select()
-    .single();
-
-  if (orderError || !order) {
+  // Encode items compactly for Stripe metadata (max 500 chars per value).
+  // Format: [{"p":"<uuid>","q":<qty>}, ...]
+  const itemsMeta = JSON.stringify(items.map((i) => ({ p: i.productId, q: i.quantity })));
+  if (itemsMeta.length > 500) {
     return NextResponse.json(
-      { error: orderError?.message ?? "Failed to create order." },
-      { status: 500 }
+      { error: "Cart has too many items. Please reduce your cart size." },
+      { status: 400 }
     );
-  }
-
-  const orderItems = items.map((item) => {
-    const product = productById.get(item.productId)!;
-    return {
-      order_id: order.id,
-      product_id: product.id,
-      product_name: product.name,
-      quantity: item.quantity,
-      unit_price: product.price,
-    };
-  });
-
-  const { error: itemsError } = await supabase
-    .from("order_items")
-    .insert(orderItems);
-
-  if (itemsError) {
-    return NextResponse.json({ error: itemsError.message }, { status: 500 });
   }
 
   const origin = new URL(request.url).origin;
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
+    payment_method_types: ["card"],
     customer_email: customer.email,
     line_items: items.map((item) => {
       const product = productById.get(item.productId)!;
@@ -118,8 +82,14 @@ export async function POST(request: Request) {
         },
       };
     }),
-    metadata: { order_id: order.id },
-    payment_intent_data: { metadata: { order_id: order.id } },
+    metadata: {
+      store_id: store.id,
+      customer_name: customer.name,
+      customer_email: customer.email,
+      customer_phone: customer.phone || "",
+      customer_address: (customer.address || "").slice(0, 500),
+      items: itemsMeta,
+    },
     success_url: `${origin}/store/${storeSlug}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/store/${storeSlug}/cart`,
   });

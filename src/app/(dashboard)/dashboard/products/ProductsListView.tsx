@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getLang } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n/translations";
 import { QueryToast } from "@/lib/toast/QueryToast";
 import { deleteProduct } from "./actions";
+import { formatPrice } from "@/lib/format";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export async function ProductsListView({
   storeId,
@@ -14,6 +18,10 @@ export async function ProductsListView({
   searchQuery?: string;
 }) {
   const supabase = await createClient();
+  const lang = await getLang();
+  const { data: storeData } = await supabase.from("stores").select("currency").eq("id", storeId).single();
+  const storeCurrency = storeData?.currency ?? "usd";
+
   let query = supabase
     .from("products")
     .select("*")
@@ -48,12 +56,12 @@ export async function ProductsListView({
     <div>
       <QueryToast param="updated" message="Product updated successfully." />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-stone-900">Products</h1>
+        <h1 className="text-2xl font-semibold text-stone-900">{t(lang, "products_heading")}</h1>
         <Link
           href={`${basePath}/new`}
-          className="rounded-md bg-[var(--store-primary)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)]"
+          className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-teal-700"
         >
-          New Product
+          {t(lang, "new_product_btn")}
         </Link>
       </div>
 
@@ -61,7 +69,7 @@ export async function ProductsListView({
         <input
           type="search"
           name="q"
-          placeholder="Search products by name..."
+          placeholder={t(lang, "search_products_dashboard")}
           defaultValue={searchQuery}
           className="w-full max-w-sm rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
         />
@@ -72,11 +80,11 @@ export async function ProductsListView({
           <thead className="bg-stone-50 text-stone-600">
             <tr>
               <th className="px-4 py-2 font-medium"></th>
-              <th className="px-4 py-2 font-medium">Name</th>
-              <th className="px-4 py-2 font-medium">Category</th>
-              <th className="px-4 py-2 font-medium">Price</th>
-              <th className="px-4 py-2 font-medium">Stock</th>
-              <th className="px-4 py-2 font-medium">Status</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_name")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_category")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_price")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "stock_label")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_status")}</th>
               <th className="px-4 py-2 font-medium"></th>
             </tr>
           </thead>
@@ -103,7 +111,7 @@ export async function ProductsListView({
                     : "—"}
                 </td>
                 <td className="px-4 py-2 text-stone-600">
-                  ${(product.price / 100).toFixed(2)}
+                  {formatPrice(product.price, storeCurrency)}
                 </td>
                 <td className="px-4 py-2 text-stone-600">{product.stock}</td>
                 <td className="px-4 py-2">
@@ -114,7 +122,7 @@ export async function ProductsListView({
                         : "rounded-full bg-stone-200 px-2 py-0.5 text-xs font-medium text-stone-600"
                     }
                   >
-                    {product.is_active ? "active" : "hidden"}
+                    {product.is_active ? t(lang, "status_active") : t(lang, "status_hidden")}
                   </span>
                 </td>
                 <td className="px-4 py-2 text-right">
@@ -123,16 +131,9 @@ export async function ProductsListView({
                       href={`${basePath}/${product.id}/edit`}
                       className="text-sm text-stone-600 hover:text-stone-900"
                     >
-                      Edit
+                      {t(lang, "action_edit")}
                     </Link>
-                    <form action={deleteProduct.bind(null, storeId, product.id)}>
-                      <button
-                        type="submit"
-                        className="text-sm text-red-600 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
-                    </form>
+                    <DeleteButton action={deleteProduct.bind(null, storeId, product.id)} lang={lang} />
                   </div>
                 </td>
               </tr>
@@ -141,8 +142,8 @@ export async function ProductsListView({
               <tr>
                 <td colSpan={7} className="px-4 py-6 text-center text-stone-500">
                   {searchQuery
-                    ? `No products found matching "${searchQuery}".`
-                    : "No products yet. Create your first product to get started."}
+                    ? `${t(lang, "no_products_matching_dashboard")} "${searchQuery}".`
+                    : t(lang, "no_products_dashboard")}
                 </td>
               </tr>
             )}

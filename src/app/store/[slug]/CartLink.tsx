@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart/CartContext";
+import { t, type Lang } from "@/lib/i18n/translations";
 
-export function CartLink({ slug, textColor }: { slug: string; textColor: string }) {
+export function CartLink({ slug, textColor, lang }: { slug: string; textColor: string; lang: Lang }) {
   const { totalQuantity } = useCart();
 
   return (
@@ -27,7 +28,7 @@ export function CartLink({ slug, textColor }: { slug: string; textColor: string 
         <circle cx="20" cy="21" r="1" />
         <path d="M1 1h2l2.6 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L21 6H6" />
       </svg>
-      Cart {totalQuantity > 0 ? `(${totalQuantity})` : ""}
+      {t(lang, "nav_cart")} {totalQuantity > 0 ? `(${totalQuantity})` : ""}
     </Link>
   );
 }

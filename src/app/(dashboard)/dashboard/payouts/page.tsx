@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/data/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getLang } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n/translations";
 import {
   getStoreRevenueByCurrency,
   getStorePayoutsByCurrency,
   subtractAmounts,
-  formatAmounts,
+  sumAmounts,
 } from "@/lib/data/revenue";
 import { RetrievePayoutButton } from "./RetrievePayoutButton";
+import { formatPrice } from "@/lib/format";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-stone-200 text-stone-600",
@@ -20,9 +23,9 @@ export default async function PayoutsPage() {
     return <p className="text-stone-600">No store assigned.</p>;
   }
 
-  const supabase = await createClient();
+  const [supabase, lang] = [await createClient(), await getLang()];
   const [{ data: store }, revenue, retrieved, { data: payouts }] = await Promise.all([
-    supabase.from("stores").select("billing_info").eq("id", profile.store_id).single(),
+    supabase.from("stores").select("billing_info, currency").eq("id", profile.store_id).single(),
     getStoreRevenueByCurrency(supabase, profile.store_id),
     getStorePayoutsByCurrency(supabase, profile.store_id),
     supabase
@@ -35,55 +38,53 @@ export default async function PayoutsPage() {
   const remaining = subtractAmounts(revenue, retrieved);
   const canRetrieve = [...remaining.values()].some((amount) => amount > 0);
   const hasBillingInfo = Object.values(store?.billing_info ?? {}).some((value) => value);
+  const storeCurrency = store?.currency ?? "usd";
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-stone-900">Payouts</h1>
+      <h1 className="text-2xl font-semibold text-stone-900">{t(lang, "payouts_heading")}</h1>
 
       {!hasBillingInfo && (
         <p className="mt-2 text-sm text-amber-700">
-          Add your{" "}
+          {t(lang, "billing_info_missing_before")}{" "}
           <Link href="/dashboard/settings/billing" className="underline">
-            billing information
+            {t(lang, "billing_info_link_text")}
           </Link>{" "}
-          so the marketplace admin knows where to send your payouts.
+          {t(lang, "billing_info_missing_after")}
         </p>
       )}
 
       <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
-          <dt className="text-sm text-stone-600">Total revenue</dt>
-          <dd className="mt-1 text-lg font-semibold">{formatAmounts(revenue)}</dd>
+        <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">
+          <dt className="text-sm text-stone-600 transition-colors group-hover:text-white">{t(lang, "total_revenue_stat")}</dt>
+          <dd className="mt-1 text-lg font-semibold transition-colors group-hover:text-white">{formatPrice(sumAmounts(revenue), storeCurrency)}</dd>
         </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
-          <dt className="text-sm text-stone-600">Retrieved</dt>
-          <dd className="mt-1 text-lg font-semibold">{formatAmounts(retrieved)}</dd>
+        <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">
+          <dt className="text-sm text-stone-600 transition-colors group-hover:text-white">{t(lang, "retrieved_stat")}</dt>
+          <dd className="mt-1 text-lg font-semibold transition-colors group-hover:text-white">{formatPrice(sumAmounts(retrieved), storeCurrency)}</dd>
         </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
-          <dt className="text-sm text-stone-600">Remaining</dt>
-          <dd className="mt-1 text-lg font-semibold">{formatAmounts(remaining)}</dd>
+        <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">
+          <dt className="text-sm text-stone-600 transition-colors group-hover:text-white">{t(lang, "remaining_stat")}</dt>
+          <dd className="mt-1 text-lg font-semibold transition-colors group-hover:text-white">{formatPrice(sumAmounts(remaining), storeCurrency)}</dd>
         </div>
       </dl>
 
-      <p className="mt-2 text-sm text-stone-600">
-        Retrieved funds are sent to the bank account or PayPal email in your billing
-        information.
-      </p>
+      <p className="mt-2 text-sm text-stone-600">{t(lang, "retrieved_funds_desc")}</p>
 
       <div className="mt-6">
-        <RetrievePayoutButton canRetrieve={canRetrieve} />
+        <RetrievePayoutButton canRetrieve={canRetrieve} hasBillingInfo={hasBillingInfo} lang={lang} />
       </div>
 
       <div className="mt-8">
-        <h2 className="text-sm font-medium text-stone-900">Retrieval history</h2>
+        <h2 className="text-sm font-medium text-stone-900">{t(lang, "retrieval_history_heading")}</h2>
         <div className="mt-2 overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-stone-50 text-stone-600">
               <tr>
-                <th className="px-4 py-2 font-medium">Date requested</th>
-                <th className="px-4 py-2 font-medium">Amount</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Date paid</th>
+                <th className="px-4 py-2 font-medium">{t(lang, "col_date_requested")}</th>
+                <th className="px-4 py-2 font-medium">{t(lang, "col_amount")}</th>
+                <th className="px-4 py-2 font-medium">{t(lang, "col_status")}</th>
+                <th className="px-4 py-2 font-medium">{t(lang, "col_date_paid")}</th>
               </tr>
             </thead>
             <tbody>
@@ -93,7 +94,7 @@ export default async function PayoutsPage() {
                     {new Date(payout.requested_at).toLocaleString()}
                   </td>
                   <td className="px-4 py-2 font-medium">
-                    {(payout.amount / 100).toFixed(2)} {payout.currency.toUpperCase()}
+                    {formatPrice(payout.amount, storeCurrency)}
                   </td>
                   <td className="px-4 py-2">
                     <span
@@ -112,7 +113,7 @@ export default async function PayoutsPage() {
               {!payouts?.length && (
                 <tr>
                   <td colSpan={4} className="px-4 py-6 text-center text-stone-500">
-                    No payouts retrieved yet.
+                    {t(lang, "no_payouts_retrieved_yet")}
                   </td>
                 </tr>
               )}

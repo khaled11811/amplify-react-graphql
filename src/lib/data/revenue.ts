@@ -1,8 +1,9 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, OrderStatus } from "@/types/database.types";
+import { formatPrice } from "@/lib/format";
 
-const REVENUE_STATUSES: OrderStatus[] = ["paid", "processing", "shipped", "completed"];
+const REVENUE_STATUSES: OrderStatus[] = ["paid", "shipped", "completed"];
 
 export type AmountsByCurrency = Map<string, number>;
 
@@ -37,10 +38,16 @@ export async function getStorePayoutsByCurrency(
 }
 
 export function formatAmounts(amounts: AmountsByCurrency): string {
-  if (amounts.size === 0) return "$0.00";
+  if (amounts.size === 0) return formatPrice(0, "usd");
   return [...amounts.entries()]
-    .map(([currency, amount]) => `${(amount / 100).toFixed(2)} ${currency.toUpperCase()}`)
+    .map(([currency, amount]) => formatPrice(amount, currency))
     .join(", ");
+}
+
+export function sumAmounts(amounts: AmountsByCurrency): number {
+  let total = 0;
+  for (const amount of amounts.values()) total += amount;
+  return total;
 }
 
 export function subtractAmounts(a: AmountsByCurrency, b: AmountsByCurrency): AmountsByCurrency {

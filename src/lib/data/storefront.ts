@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Product, ProductImage } from "@/types/database.types";
+import { buildCategoryTree, type CategoryNode } from "@/lib/categories";
 
 export type ProductWithImages = Product & { images: ProductImage[] };
 
@@ -41,49 +42,80 @@ export const getStoreBySlug = cache(async (slug: string) => {
   return data;
 });
 
-export const getStoreCategories = cache(async (storeId: string) => {
+export const getStoreCategories = cache(async (storeId: string): Promise<CategoryNode[]> => {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("categories")
-    .select("*")
-    .eq("store_id", storeId)
-    .order("name");
-  return data ?? [];
+
+  const [{ data: allCategories }, { data: activeProducts }] = await Promise.all([
+    supabase.from("categories").select("*").eq("store_id", storeId).order("name"),
+    supabase.from("products").select("category_id").eq("store_id", storeId).eq("is_active", true).not("category_id", "is", null),
+  ]);
+
+  if (!allCategories?.length) return [];
+
+  const activeCategoryIds = new Set((activeProducts ?? []).map((p) => p.category_id));
+
+  const tree = buildCategoryTree(allCategories);
+
+  function hasActiveProducts(node: CategoryNode): boolean {
+    if (activeCategoryIds.has(node.id)) return true;
+    return node.children.some(hasActiveProducts);
+  }
+
+  function filterTree(nodes: CategoryNode[]): CategoryNode[] {
+    return nodes
+      .filter(hasActiveProducts)
+      .map((node) => ({ ...node, children: filterTree(node.children) }));
+  }
+
+  return filterTree(tree);
 });
 
+const PAGE_SIZE = 30;
+
 export const getStoreProducts = cache(
-  async (storeId: string, categorySlug?: string, search?: string) => {
+  async (storeId: string, categorySlug?: string, search?: string, page = 1) => {
     const supabase = await createClient();
 
-    let categoryId: string | undefined;
+    let categoryIds: string[] | undefined;
     if (categorySlug) {
-      const { data: category } = await supabase
-        .from("categories")
-        .select("id")
-        .eq("store_id", storeId)
-        .eq("slug", categorySlug)
-        .single();
-      categoryId = category?.id;
-      if (!categoryId) return [];
+      const [{ data: rootCat }, { data: allCategories }] = await Promise.all([
+        supabase.from("categories").select("id").eq("store_id", storeId).eq("slug", categorySlug).single(),
+        supabase.from("categories").select("id, parent_id").eq("store_id", storeId),
+      ]);
+
+      if (!rootCat) return { products: [], total: 0 };
+
+      const catMap = allCategories ?? [];
+
+      function collectIds(parentId: string): string[] {
+        const children = catMap.filter((c) => c.parent_id === parentId);
+        return [parentId, ...children.flatMap((c) => collectIds(c.id))];
+      }
+
+      categoryIds = collectIds(rootCat.id);
     }
+
+    const offset = (page - 1) * PAGE_SIZE;
 
     let query = supabase
       .from("products")
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("store_id", storeId)
       .eq("is_active", true)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1);
 
-    if (categoryId) {
-      query = query.eq("category_id", categoryId);
+    if (categoryIds) {
+      query = query.in("category_id", categoryIds);
     }
 
     if (search) {
       query = query.ilike("name", `%${search}%`);
     }
 
-    const { data } = await query;
-    return attachImages(supabase, data ?? []);
+    const { data, count } = await query;
+    const products = await attachImages(supabase, data ?? []);
+    return { products, total: count ?? 0 };
   }
 );
 

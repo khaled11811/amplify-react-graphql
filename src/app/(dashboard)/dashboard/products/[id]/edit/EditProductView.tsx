@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getLang } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n/translations";
 import { QueryToast } from "@/lib/toast/QueryToast";
 import { ProductForm } from "../../ProductForm";
 import { ProductImages } from "./ProductImages";
@@ -18,18 +21,11 @@ export async function EditProductView({
 }) {
   const supabase = await createClient();
 
-  const [{ data: product }, { data: categories }] = await Promise.all([
-    supabase
-      .from("products")
-      .select("*")
-      .eq("id", productId)
-      .eq("store_id", storeId)
-      .single(),
-    supabase
-      .from("categories")
-      .select("*")
-      .eq("store_id", storeId)
-      .order("name"),
+  const [{ data: product }, { data: categories }, { data: store }, lang] = await Promise.all([
+    supabase.from("products").select("*").eq("id", productId).eq("store_id", storeId).single(),
+    supabase.from("categories").select("*").eq("store_id", storeId).order("name"),
+    supabase.from("stores").select("currency, store_type").eq("id", storeId).single(),
+    getLang(),
   ]);
 
   if (!product) notFound();
@@ -43,7 +39,10 @@ export async function EditProductView({
   return (
     <div>
       <QueryToast param="created" message="Product created successfully." />
-      <h1 className="text-2xl font-semibold text-stone-900">Edit Product</h1>
+      <Link href={basePath} className="text-sm text-stone-600 hover:text-stone-900">
+        {t(lang, "back_to_products")}
+      </Link>
+      <h1 className="mt-2 text-2xl font-semibold text-stone-900">{t(lang, "edit_product_heading")}</h1>
 
       {justCreated && (
         <p className="mt-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
@@ -52,12 +51,13 @@ export async function EditProductView({
       )}
 
       <div className="mt-6">
-        <h2 className="text-sm font-medium text-stone-900">Images</h2>
+        <h2 className="text-sm font-medium text-stone-900">{t(lang, "images_label")}</h2>
         <div className="mt-2">
           <ProductImages
             productId={product.id}
             storeId={storeId}
             images={images ?? []}
+            lang={lang}
           />
         </div>
       </div>
@@ -66,6 +66,9 @@ export async function EditProductView({
         <ProductForm
           categories={categories ?? []}
           product={product}
+          currency={store?.currency ?? "usd"}
+          isDisplayShop={store?.store_type === "display_shop"}
+          lang={lang}
           action={updateProduct.bind(null, storeId, basePath, product.id)}
         />
       </div>

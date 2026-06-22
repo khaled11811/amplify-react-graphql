@@ -1,5 +1,7 @@
 import { getCurrentProfile } from "@/lib/data/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getLang } from "@/lib/i18n/server";
+import { t, type Lang } from "@/lib/i18n/translations";
 import { StoreLogo } from "./StoreLogo";
 import { AppearanceForm } from "./AppearanceForm";
 
@@ -9,7 +11,7 @@ export default async function AppearanceSettingsPage() {
     return <p className="text-stone-600">No store assigned.</p>;
   }
 
-  const supabase = await createClient();
+  const [supabase, lang] = [await createClient(), await getLang()];
   const { data: store } = await supabase
     .from("stores")
     .select("*")
@@ -23,9 +25,9 @@ export default async function AppearanceSettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-sm font-medium text-stone-900">Store logo</h2>
+        <h2 className="text-sm font-medium text-stone-900">{t(lang, "store_logo_heading")}</h2>
         <div className="mt-2">
-          <StoreLogo storeId={store.id} logoUrl={store.logo_url} />
+          <StoreLogo storeId={store.id} logoUrl={store.logo_url} lang={lang} />
         </div>
       </div>
 
@@ -40,6 +42,8 @@ export default async function AppearanceSettingsPage() {
         backgroundType={store.background_type}
         backgroundValue={store.background_value}
         bannerUrl={store.banner_url}
+        storeLang={(store.store_language === "ar" ? "ar" : "en") as Lang}
+        lang={lang}
       />
     </div>
   );

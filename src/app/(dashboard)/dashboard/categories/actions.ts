@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { canAccessStore, getCurrentProfile } from "@/lib/data/auth";
 import { categorySchema } from "@/lib/validators/store";
+import { collectDescendantIds } from "@/lib/categories";
 
 export type CategoryActionState = { error?: string } | undefined;
 
@@ -39,10 +40,56 @@ export async function createCategory(
   return undefined;
 }
 
-export async function deleteCategory(storeId: string, categoryId: string) {
+export async function updateCategory(
+  storeId: string,
+  categoryId: string,
+  _state: CategoryActionState,
+  formData: FormData
+): Promise<CategoryActionState> {
   const profile = await getCurrentProfile();
-  if (!canAccessStore(profile, storeId)) return;
+  if (!canAccessStore(profile, storeId)) return { error: "Not authorized." };
+
+  const name = (formData.get("name") as string | null)?.trim();
+  if (!name || name.length < 2) return { error: "Name must be at least 2 characters." };
+
   const supabase = await createClient();
+  const { error } = await supabase
+    .from("categories")
+    .update({ name })
+    .eq("id", categoryId)
+    .eq("store_id", storeId);
+
+  if (error) return { error: error.message };
+  revalidateCategories(storeId);
+  return undefined;
+}
+
+export async function deleteCategory(
+  storeId: string,
+  categoryId: string
+): Promise<{ error: string } | undefined> {
+  const profile = await getCurrentProfile();
+  if (!canAccessStore(profile, storeId)) return { error: "Not authorized." };
+  const supabase = await createClient();
+
+  const { data: allCategories } = await supabase
+    .from("categories")
+    .select("id, parent_id")
+    .eq("store_id", storeId);
+
+  const categoryIds = collectDescendantIds(allCategories ?? [], categoryId);
+
+  const { count } = await supabase
+    .from("products")
+    .select("*", { count: "exact", head: true })
+    .in("category_id", categoryIds);
+
+  if (count && count > 0) {
+    return {
+      error: `This category (or one of its sub-categories) has ${count} product${count > 1 ? "s" : ""} assigned to it. Please delete or reassign the product${count > 1 ? "s" : ""} first.`,
+    };
+  }
+
   await supabase.from("categories").delete().eq("id", categoryId).eq("store_id", storeId);
   revalidateCategories(storeId);
 }

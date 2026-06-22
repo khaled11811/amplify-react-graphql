@@ -65,6 +65,8 @@ export async function updateGeneralSettings(
 
   const parsed = storeGeneralSchema.safeParse({
     name: formData.get("name"),
+    fullName: formData.get("fullName") || undefined,
+    storeLanguage: formData.get("storeLanguage") || undefined,
     phone_number: formData.get("phone_number") || undefined,
     whatsapp_number: formData.get("whatsapp_number") || undefined,
     instagram: formData.get("instagram") || undefined,
@@ -79,7 +81,7 @@ export async function updateGeneralSettings(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   }
 
-  const { name, newPassword, confirmPassword, ...contactFields } = parsed.data;
+  const { name, fullName, storeLanguage, newPassword, confirmPassword, ...contactFields } = parsed.data;
 
   if (newPassword && newPassword !== confirmPassword) {
     return { error: "Passwords do not match." };
@@ -92,10 +94,22 @@ export async function updateGeneralSettings(
   const supabase = await createClient();
   const { error } = await supabase
     .from("stores")
-    .update({ name, contact_info: contactInfo })
+    .update({
+      name,
+      contact_info: contactInfo,
+      ...(storeLanguage !== undefined ? { store_language: storeLanguage } : {}),
+    })
     .eq("id", profile.store_id);
 
   if (error) return { error: error.message };
+
+  if (fullName !== undefined) {
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update({ full_name: fullName || null })
+      .eq("id", profile.id);
+    if (profileError) return { error: profileError.message };
+  }
 
   if (newPassword) {
     const { error: passwordError } = await supabase.auth.updateUser({

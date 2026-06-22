@@ -6,21 +6,16 @@ import {
   DEFAULT_THEME_COLOR,
   STORE_BACKGROUND_TYPES,
   PRESET_BACKGROUNDS,
-  STORE_FONTS,
+  LATIN_STORE_FONTS,
+  ARABIC_STORE_FONTS,
   FONT_LABELS,
   type StoreBackgroundType,
   type StoreFont,
 } from "@/lib/theme";
 import { useActionToast } from "@/lib/toast/useActionToast";
+import { t, type Lang } from "@/lib/i18n/translations";
 import { updateStoreAppearance } from "../actions";
 import { BackgroundUpload } from "./BackgroundUpload";
-
-const BACKGROUND_TYPE_LABELS: Record<StoreBackgroundType, string> = {
-  none: "None (white)",
-  color: "Solid color",
-  preset: "Preset image",
-  image: "Upload image",
-};
 
 export function AppearanceForm({
   storeId,
@@ -31,6 +26,8 @@ export function AppearanceForm({
   backgroundType,
   backgroundValue,
   bannerUrl,
+  storeLang,
+  lang,
 }: {
   storeId: string;
   description: string | null;
@@ -40,12 +37,21 @@ export function AppearanceForm({
   backgroundType: StoreBackgroundType;
   backgroundValue: string | null;
   bannerUrl: string | null;
+  storeLang: Lang;
+  lang: Lang;
 }) {
   const [state, formAction, pending] = useActionState(updateStoreAppearance, undefined);
-  useActionToast(state, "Appearance settings saved.");
+  useActionToast(state, t(lang, "toast_appearance_saved"));
   const [selectedTheme, setSelectedTheme] = useState(theme || DEFAULT_THEME_COLOR);
   const [selectedHeaderColor, setSelectedHeaderColor] = useState(headerColor || "#ffffff");
-  const [selectedFont, setSelectedFont] = useState<StoreFont>(font);
+  const availableFonts = storeLang === "ar" ? ARABIC_STORE_FONTS : LATIN_STORE_FONTS;
+  const defaultFont: StoreFont =
+    (availableFonts as readonly string[]).includes(font)
+      ? font
+      : storeLang === "ar"
+        ? "tajawal"
+        : "sans";
+  const [selectedFont, setSelectedFont] = useState<StoreFont>(defaultFont);
   const [selectedBackgroundType, setSelectedBackgroundType] = useState<StoreBackgroundType>(backgroundType);
   const [backgroundColor, setBackgroundColor] = useState(
     backgroundType === "color" && backgroundValue ? backgroundValue : "#fafaf9"
@@ -54,11 +60,18 @@ export function AppearanceForm({
     backgroundType === "preset" ? backgroundValue ?? PRESET_BACKGROUNDS[0].id : PRESET_BACKGROUNDS[0].id
   );
 
+  const BG_LABELS: Record<StoreBackgroundType, string> = {
+    none: t(lang, "bg_none"),
+    color: t(lang, "bg_solid_color"),
+    preset: t(lang, "bg_preset"),
+    image: t(lang, "bg_upload"),
+  };
+
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <label htmlFor="description" className="text-sm font-medium">
-          Store description
+          {t(lang, "store_description_label")}
         </label>
         <textarea
           id="description"
@@ -66,7 +79,7 @@ export function AppearanceForm({
           rows={4}
           maxLength={500}
           defaultValue={description ?? ""}
-          placeholder="Tell customers about your store..."
+          placeholder={t(lang, "store_description_placeholder")}
           className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
         />
       </div>
@@ -74,11 +87,8 @@ export function AppearanceForm({
       <hr className="border-stone-200" />
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Header bar color</span>
-        <p className="text-xs text-stone-500">
-          Sets the color of the top bar on your storefront. The shop name and cart text will
-          automatically switch to black or white for readability. Default is white.
-        </p>
+        <span className="text-sm font-medium">{t(lang, "header_bar_color_label")}</span>
+        <p className="text-xs text-stone-500">{t(lang, "header_bar_color_desc")}</p>
         <div className="flex items-center gap-3">
           <input
             type="color"
@@ -94,10 +104,8 @@ export function AppearanceForm({
       <hr className="border-stone-200" />
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Color theme</span>
-        <p className="text-xs text-stone-500">
-          Sets the accent color used for buttons, links, and highlights across your storefront.
-        </p>
+        <span className="text-sm font-medium">{t(lang, "color_theme_label")}</span>
+        <p className="text-xs text-stone-500">{t(lang, "color_theme_desc")}</p>
         <div className="flex items-center gap-3">
           <input
             type="color"
@@ -114,7 +122,7 @@ export function AppearanceForm({
 
       <div className="flex flex-col gap-2">
         <label htmlFor="font" className="text-sm font-medium">
-          Storefront font
+          {t(lang, "storefront_font_label")}
         </label>
         <select
           id="font"
@@ -123,7 +131,7 @@ export function AppearanceForm({
           onChange={(e) => setSelectedFont(e.target.value as StoreFont)}
           className="max-w-xs rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
         >
-          {STORE_FONTS.map((option) => (
+          {availableFonts.map((option) => (
             <option key={option} value={option}>
               {FONT_LABELS[option]}
             </option>
@@ -134,7 +142,7 @@ export function AppearanceForm({
       <hr className="border-stone-200" />
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Storefront background</span>
+        <span className="text-sm font-medium">{t(lang, "storefront_bg_label")}</span>
         <input type="hidden" name="background_type" value={selectedBackgroundType} />
         <div className="flex flex-wrap gap-3">
           {STORE_BACKGROUND_TYPES.map((option) => {
@@ -150,7 +158,7 @@ export function AppearanceForm({
                     : "border-stone-200 hover:border-stone-300"
                 }`}
               >
-                {BACKGROUND_TYPE_LABELS[option]}
+                {BG_LABELS[option]}
               </button>
             );
           })}
@@ -190,20 +198,19 @@ export function AppearanceForm({
 
         {selectedBackgroundType === "image" && (
           <div className="mt-2">
-            <BackgroundUpload storeId={storeId} bannerUrl={bannerUrl} />
+            <BackgroundUpload storeId={storeId} bannerUrl={bannerUrl} lang={lang} />
           </div>
         )}
       </div>
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-700">Saved.</p>}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-md bg-[var(--store-primary)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)] disabled:opacity-50"
+        className="self-start rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-teal-700 disabled:opacity-50"
       >
-        {pending ? "Saving..." : "Save"}
+        {pending ? t(lang, "saving_btn") : t(lang, "save_btn")}
       </button>
     </form>
   );

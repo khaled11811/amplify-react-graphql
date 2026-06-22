@@ -5,16 +5,20 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { FileSelectButton } from "@/components/FileSelectButton";
+import { DeleteButton } from "@/components/DeleteButton";
+import { t, type Lang } from "@/lib/i18n/translations";
 import type { ProductImage } from "@/types/database.types";
 
 export function ProductImages({
   productId,
   storeId,
   images,
+  lang = "en",
 }: {
   productId: string;
   storeId: string;
   images: ProductImage[];
+  lang?: Lang;
 }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -127,7 +131,7 @@ export function ProductImages({
                 />
                 {image.sort_order === 0 && (
                   <span className="absolute left-1 top-1 rounded-full bg-[var(--store-primary)] px-1.5 py-0.5 text-[10px] font-medium text-white">
-                    Primary
+                    {t(lang, "primary_badge")}
                   </span>
                 )}
               </div>
@@ -138,16 +142,15 @@ export function ProductImages({
                     onClick={() => handleSetPrimary(image)}
                     className="text-stone-600 hover:text-stone-900"
                   >
-                    Make primary
+                    {t(lang, "make_primary_btn")}
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => handleDelete(image)}
+                <DeleteButton
+                  action={() => handleDelete(image)}
+                  label={t(lang, "remove_btn")}
+                  lang={lang}
                   className="text-red-600 hover:text-red-800"
-                >
-                  Remove
-                </button>
+                />
               </div>
             </div>
           ))}
@@ -158,10 +161,11 @@ export function ProductImages({
           inputRef={fileInputRef}
           fileName={fileName}
           accept="image/*"
+          lang={lang}
           onChange={handleFileChange}
           disabled={uploading}
         />
-        {uploading && <p className="mt-1 text-sm text-stone-500">Uploading...</p>}
+        {uploading && <p className="mt-1 text-sm text-stone-500">{t(lang, "uploading_msg")}</p>}
         {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       </div>
     </div>

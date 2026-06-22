@@ -34,3 +34,23 @@ export function flattenCategoryTree(nodes: CategoryNode[]): CategoryNode[] {
   }
   return result;
 }
+
+export function collectDescendantIds(categories: Pick<Category, "id" | "parent_id">[], rootId: string): string[] {
+  const childrenOf = new Map<string, string[]>();
+  for (const c of categories) {
+    if (c.parent_id) {
+      if (!childrenOf.has(c.parent_id)) childrenOf.set(c.parent_id, []);
+      childrenOf.get(c.parent_id)!.push(c.id);
+    }
+  }
+  const ids: string[] = [rootId];
+  const queue = [rootId];
+  while (queue.length) {
+    const id = queue.shift()!;
+    for (const childId of childrenOf.get(id) ?? []) {
+      ids.push(childId);
+      queue.push(childId);
+    }
+  }
+  return ids;
+}

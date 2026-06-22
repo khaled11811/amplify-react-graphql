@@ -21,6 +21,17 @@ export async function retrievePayout(
   }
 
   const supabase = await createClient();
+  const { data: store } = await supabase
+    .from("stores")
+    .select("billing_info")
+    .eq("id", profile.store_id)
+    .single();
+
+  const hasBillingInfo = Object.values(store?.billing_info ?? {}).some((v) => v);
+  if (!hasBillingInfo) {
+    return { error: "billing_required_error" };
+  }
+
   const [revenue, retrieved] = await Promise.all([
     getStoreRevenueByCurrency(supabase, profile.store_id),
     getStorePayoutsByCurrency(supabase, profile.store_id),

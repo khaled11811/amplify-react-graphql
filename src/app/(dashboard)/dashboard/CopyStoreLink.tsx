@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { t, type Lang } from "@/lib/i18n/translations";
 
-export function CopyStoreLink({ slug }: { slug: string }) {
+export function CopyStoreLink({ slug, lang }: { slug: string; lang: Lang }) {
   const [copied, setCopied] = useState(false);
   const path = `/store/${slug}`;
   const [url, setUrl] = useState(path);
@@ -23,7 +24,7 @@ export function CopyStoreLink({ slug }: { slug: string }) {
 
   return (
     <div className="mt-4 flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm shadow-sm">
-      <span className="text-stone-600">Your store link:</span>
+      <span className="text-stone-600">{t(lang, "store_link_prefix")}</span>
       <a
         href={path}
         target="_blank"
@@ -34,9 +35,9 @@ export function CopyStoreLink({ slug }: { slug: string }) {
       <button
         type="button"
         onClick={handleCopy}
-        className="shrink-0 rounded-md bg-amber-800 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-amber-700"
+        className="shrink-0 rounded-md bg-teal-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-teal-700"
       >
-        {copied ? "Copied!" : "Copy"}
+        {copied ? t(lang, "copied_btn") : t(lang, "copy_btn")}
       </button>
     </div>
   );

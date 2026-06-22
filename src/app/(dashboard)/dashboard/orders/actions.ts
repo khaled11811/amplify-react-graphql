@@ -3,12 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { canAccessStore, getCurrentProfile } from "@/lib/data/auth";
+import { sendOrderEmail } from "@/lib/email";
 import type { OrderStatus } from "@/types/database.types";
 
 const VALID_STATUSES: OrderStatus[] = [
-  "pending",
   "paid",
-  "processing",
   "shipped",
   "completed",
   "cancelled",
@@ -24,11 +23,32 @@ export async function updateOrderStatus(storeId: string, orderId: string, formDa
   }
 
   const supabase = await createClient();
-  await supabase
+
+  const { data: order } = await supabase
     .from("orders")
     .update({ status: status as OrderStatus })
     .eq("id", orderId)
-    .eq("store_id", storeId);
+    .eq("store_id", storeId)
+    .select()
+    .single();
+
+  if (order) {
+    const [{ data: items }, { data: store }] = await Promise.all([
+      supabase.from("order_items").select("*").eq("order_id", orderId),
+      supabase.from("stores").select("name, currency").eq("id", storeId).single(),
+    ]);
+
+    await sendOrderEmail({
+      customerEmail: order.customer_email,
+      customerName: order.customer_name,
+      storeName: store?.name ?? "The Store",
+      orderId: order.id,
+      status: order.status,
+      totalAmount: order.total_amount,
+      currency: store?.currency ?? order.currency,
+      items: items ?? [],
+    });
+  }
 
   revalidatePath("/dashboard/orders");
   revalidatePath(`/dashboard/orders/${orderId}`);

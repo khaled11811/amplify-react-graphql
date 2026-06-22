@@ -1,12 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
+import { getLang } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n/translations";
 import type { BillingInfo } from "@/types/database.types";
+import { formatPrice } from "@/lib/format";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-stone-200 text-stone-600",
   paid: "bg-green-100 text-green-700",
 };
 
-function formatBillingInfo(billingInfo: BillingInfo): string {
+function formatBillingInfo(billingInfo: BillingInfo, noBillingText: string): string {
   const parts = [
     billingInfo.account_holder,
     billingInfo.bank_name,
@@ -15,11 +18,12 @@ function formatBillingInfo(billingInfo: BillingInfo): string {
     billingInfo.paypal_email && `PayPal: ${billingInfo.paypal_email}`,
   ].filter(Boolean);
 
-  return parts.length > 0 ? parts.join(" • ") : "No billing info on file";
+  return parts.length > 0 ? parts.join(" • ") : noBillingText;
 }
 
 export default async function AdminPayoutsPage() {
   const supabase = await createClient();
+  const lang = await getLang();
 
   const { data: payouts } = await supabase
     .from("payouts")
@@ -32,24 +36,23 @@ export default async function AdminPayoutsPage() {
     : { data: [] };
 
   const storeById = new Map(stores?.map((s) => [s.id, s]));
+  const noBillingText = t(lang, "no_billing_info");
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-stone-900">Payouts</h1>
-      <p className="mt-1 text-sm text-stone-600">
-        Retrieval history for every store. Store managers mark their own payouts as paid.
-      </p>
+      <h1 className="text-2xl font-semibold text-stone-900">{t(lang, "payouts_heading")}</h1>
+      <p className="mt-1 text-sm text-stone-600">{t(lang, "admin_payouts_desc")}</p>
 
       <div className="mt-6 overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="bg-stone-50 text-stone-600">
             <tr>
-              <th className="px-4 py-2 font-medium">Date requested</th>
-              <th className="px-4 py-2 font-medium">Store</th>
-              <th className="px-4 py-2 font-medium">Amount</th>
-              <th className="px-4 py-2 font-medium">Billing info</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-              <th className="px-4 py-2 font-medium">Date paid</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_date_requested")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_name")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_amount")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_billing_info")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_status")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_date_paid")}</th>
             </tr>
           </thead>
           <tbody>
@@ -62,10 +65,10 @@ export default async function AdminPayoutsPage() {
                   </td>
                   <td className="px-4 py-2 font-medium">{store?.name ?? "—"}</td>
                   <td className="px-4 py-2 text-stone-600">
-                    {(payout.amount / 100).toFixed(2)} {payout.currency.toUpperCase()}
+                    {formatPrice(payout.amount, payout.currency)}
                   </td>
                   <td className="px-4 py-2 text-stone-600">
-                    {formatBillingInfo(store?.billing_info ?? {})}
+                    {formatBillingInfo(store?.billing_info ?? {}, noBillingText)}
                   </td>
                   <td className="px-4 py-2">
                     <span
@@ -85,7 +88,7 @@ export default async function AdminPayoutsPage() {
             {!payouts?.length && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-stone-500">
-                  No payouts requested yet.
+                  {t(lang, "no_payouts_requested_yet")}
                 </td>
               </tr>
             )}

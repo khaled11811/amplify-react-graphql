@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Playfair_Display, Poppins } from "next/font/google";
+import { Playfair_Display, Poppins, Tajawal, Cairo, Amiri } from "next/font/google";
 import { notFound } from "next/navigation";
 import { getStoreBySlug } from "@/lib/data/storefront";
 import { CartProvider } from "@/lib/cart/CartContext";
 import { themeStyle, backgroundStyle, getContrastTextColor, DEFAULT_THEME_COLOR } from "@/lib/theme";
+import { t, type Lang } from "@/lib/i18n/translations";
 import { CartLink } from "./CartLink";
 import { StoreContact } from "./StoreContact";
 
@@ -19,6 +20,24 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
+const tajawal = Tajawal({
+  variable: "--font-store-tajawal",
+  subsets: ["arabic"],
+  weight: ["400", "500", "700"],
+});
+
+const cairo = Cairo({
+  variable: "--font-store-cairo",
+  subsets: ["arabic"],
+  weight: ["400", "500", "700"],
+});
+
+const amiri = Amiri({
+  variable: "--font-store-amiri",
+  subsets: ["arabic"],
+  weight: ["400", "700"],
+});
+
 export default async function StoreLayout({
   children,
   params,
@@ -31,6 +50,8 @@ export default async function StoreLayout({
 
   if (!store) notFound();
 
+  const lang: Lang = store.store_language === "ar" ? "ar" : "en";
+
   const style = {
     ...themeStyle(store.theme || DEFAULT_THEME_COLOR),
     ...backgroundStyle(store),
@@ -41,14 +62,22 @@ export default async function StoreLayout({
       ? playfairDisplay.className
       : store.font === "rounded"
         ? poppins.className
-        : undefined;
+        : store.font === "tajawal"
+          ? tajawal.className
+          : store.font === "cairo"
+            ? cairo.className
+            : store.font === "amiri"
+              ? amiri.className
+              : undefined;
 
   const headerColor = store.header_color || "#ffffff";
   const headerTextColor = getContrastTextColor(headerColor);
 
+  const isPaidShop = store.store_type === "paid_shop";
+
   return (
     <CartProvider storeSlug={slug}>
-      <div className={`flex min-h-screen flex-col ${fontClassName ?? ""}`} style={style}>
+      <div dir={lang === "ar" ? "rtl" : "ltr"} className={`flex min-h-screen flex-col ${fontClassName ?? ""}`} style={style}>
         <header className="sticky top-0 z-20 shadow-sm" style={{ backgroundColor: headerColor }}>
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <Link
@@ -75,14 +104,14 @@ export default async function StoreLayout({
               )}
               {store.name}
             </Link>
-            <CartLink slug={slug} textColor={headerTextColor} />
+            {isPaidShop && <CartLink slug={slug} textColor={headerTextColor} lang={lang} />}
           </div>
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">{children}</main>
         <footer className="border-t border-stone-200 bg-white/80 px-4 py-6 sm:px-6">
           <div className="mx-auto max-w-7xl">
             <StoreContact contactInfo={store.contact_info ?? {}} />
-            <p className="mt-4 text-center text-xs text-stone-400">Powered by TajerLink</p>
+            <p className="mt-4 text-center text-xs text-stone-400">{t(lang, "powered_by_text")}</p>
           </div>
         </footer>
       </div>

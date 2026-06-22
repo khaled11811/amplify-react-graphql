@@ -20,6 +20,8 @@ export async function createStore(
   const parsed = createStoreSchema.safeParse({
     storeName: formData.get("storeName"),
     storeSlug: formData.get("storeSlug"),
+    storeType: formData.get("storeType"),
+    managerName: formData.get("managerName") || undefined,
     managerEmail: formData.get("managerEmail"),
     managerPassword: formData.get("managerPassword"),
   });
@@ -28,7 +30,7 @@ export async function createStore(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   }
 
-  const { storeName, storeSlug, managerEmail, managerPassword } = parsed.data;
+  const { storeName, storeSlug, storeType, managerName, managerEmail, managerPassword } = parsed.data;
 
   const adminClient = createAdminClient();
 
@@ -53,6 +55,7 @@ export async function createStore(
       owner_id: userData.user.id,
       name: storeName,
       slug: storeSlug,
+      store_type: storeType,
     })
     .select()
     .single();
@@ -63,7 +66,7 @@ export async function createStore(
 
   const { error: profileError } = await supabase
     .from("profiles")
-    .update({ store_id: store.id })
+    .update({ store_id: store.id, full_name: managerName ?? null })
     .eq("id", userData.user.id);
 
   if (profileError) {
@@ -87,12 +90,54 @@ export async function toggleStoreStatus(storeId: string, currentStatus: string) 
   revalidatePath("/admin/stores");
 }
 
+export type UpdateFeeState = { error?: string } | undefined;
+
+export async function updateSubscriptionFee(
+  _state: UpdateFeeState,
+  formData: FormData
+): Promise<UpdateFeeState> {
+  const profile = await getCurrentProfile();
+  if (profile?.role !== "admin") return { error: "Not authorized." };
+
+  const raw = formData.get("fee");
+  const fee = Number(raw);
+  if (!Number.isFinite(fee) || fee <= 0) {
+    return { error: "fee_zero_warning" };
+  }
+
+  const adminClient = createAdminClient();
+  const { error } = await adminClient
+    .from("app_settings")
+    .upsert({ key: "subscription_fee_aed", value: String(fee), updated_at: new Date().toISOString() });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/stores");
+}
+
 export async function deleteStore(storeId: string) {
   const profile = await getCurrentProfile();
   if (profile?.role !== "admin") return;
 
   const supabase = await createClient();
-  await supabase.from("stores").delete().eq("id", storeId);
+
+  const { data: store } = await supabase
+    .from("stores")
+    .select("owner_id")
+    .eq("id", storeId)
+    .single();
+
+  await supabase
+    .from("stores")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", storeId);
+
+  if (store?.owner_id) {
+    const adminClient = createAdminClient();
+    await adminClient.auth.admin.updateUserById(store.owner_id, {
+      ban_duration: "876000h",
+    });
+  }
 
   revalidatePath("/admin/stores");
 }

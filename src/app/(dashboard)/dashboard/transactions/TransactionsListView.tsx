@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getLang } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n/translations";
+import { formatPrice } from "@/lib/format";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-stone-200 text-stone-600",
@@ -16,11 +19,12 @@ export async function TransactionsListView({
   ordersBasePath: string;
 }) {
   const supabase = await createClient();
-  const { data: transactions } = await supabase
-    .from("transactions")
-    .select("*")
-    .eq("store_id", storeId)
-    .order("created_at", { ascending: false });
+  const lang = await getLang();
+  const [{ data: transactions }, { data: storeData }] = await Promise.all([
+    supabase.from("transactions").select("*").eq("store_id", storeId).order("created_at", { ascending: false }),
+    supabase.from("stores").select("currency").eq("id", storeId).single(),
+  ]);
+  const storeCurrency = storeData?.currency ?? "usd";
 
   const orderIds = [...new Set((transactions ?? []).map((tx) => tx.order_id))];
   const { data: orders } = orderIds.length
@@ -34,17 +38,17 @@ export async function TransactionsListView({
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-stone-900">Transactions</h1>
+      <h1 className="text-2xl font-semibold text-stone-900">{t(lang, "transactions_heading")}</h1>
 
       <div className="mt-6 overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="bg-stone-50 text-stone-600">
             <tr>
-              <th className="px-4 py-2 font-medium">Date</th>
-              <th className="px-4 py-2 font-medium">Customer</th>
-              <th className="px-4 py-2 font-medium">Amount</th>
-              <th className="px-4 py-2 font-medium">Method</th>
-              <th className="px-4 py-2 font-medium">Status</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_date")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_customer")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_amount")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_method")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_status")}</th>
               <th className="px-4 py-2 font-medium"></th>
             </tr>
           </thead>
@@ -61,7 +65,7 @@ export async function TransactionsListView({
                     <div className="text-xs text-stone-500">{order?.customer_email}</div>
                   </td>
                   <td className="px-4 py-2 text-stone-600">
-                    ${(tx.amount / 100).toFixed(2)} {tx.currency.toUpperCase()}
+                    {formatPrice(tx.amount, storeCurrency)}
                   </td>
                   <td className="px-4 py-2 text-stone-600">{tx.payment_method ?? "—"}</td>
                   <td className="px-4 py-2">
@@ -78,7 +82,7 @@ export async function TransactionsListView({
                       href={`${ordersBasePath}/${tx.order_id}`}
                       className="text-sm text-stone-600 hover:text-stone-900"
                     >
-                      View order
+                      {t(lang, "view_order_link")}
                     </Link>
                   </td>
                 </tr>
@@ -87,7 +91,7 @@ export async function TransactionsListView({
             {!transactions?.length && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-stone-500">
-                  No transactions yet.
+                  {t(lang, "no_transactions_yet")}
                 </td>
               </tr>
             )}

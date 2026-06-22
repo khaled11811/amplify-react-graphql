@@ -20,6 +20,7 @@ export async function updateStoreAdmin(
 
   const parsed = editStoreSchema.safeParse({
     name: formData.get("name"),
+    managerName: formData.get("managerName") || undefined,
     managerEmail: formData.get("managerEmail"),
     publicEmail: formData.get("publicEmail") || undefined,
     newPassword: formData.get("newPassword") || undefined,
@@ -29,7 +30,7 @@ export async function updateStoreAdmin(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   }
 
-  const { name, managerEmail, publicEmail, newPassword } = parsed.data;
+  const { name, managerName, managerEmail, publicEmail, newPassword } = parsed.data;
 
   const supabase = await createClient();
   const { data: store } = await supabase
@@ -56,10 +57,14 @@ export async function updateStoreAdmin(
     if (userError) return { error: userError.message };
   }
 
-  if (managerEmail) {
+  const profileUpdate: { email?: string; full_name?: string | null } = {};
+  if (managerEmail) profileUpdate.email = managerEmail;
+  if (managerName !== undefined) profileUpdate.full_name = managerName || null;
+
+  if (Object.keys(profileUpdate).length > 0) {
     const { error: profileError } = await adminClient
       .from("profiles")
-      .update({ email: managerEmail })
+      .update(profileUpdate)
       .eq("id", store.owner_id);
     if (profileError) return { error: profileError.message };
   }

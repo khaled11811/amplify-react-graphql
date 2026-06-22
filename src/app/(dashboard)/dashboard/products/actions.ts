@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { canAccessStore, getCurrentProfile } from "@/lib/data/auth";
 import { productSchema } from "@/lib/validators/store";
 
-export type ProductActionState = { error?: string } | undefined;
+export type ProductActionState = { error?: string; redirect?: string } | undefined;
 
 function parseProductForm(formData: FormData) {
   const categoryId = formData.get("category_id");
@@ -74,7 +74,7 @@ export async function createProduct(
   }
 
   revalidateProducts(storeId);
-  redirect(`${basePath}/${product.id}/edit?created=1`);
+  return { redirect: `${basePath}/${product.id}/edit?created=1` };
 }
 
 export async function updateProduct(

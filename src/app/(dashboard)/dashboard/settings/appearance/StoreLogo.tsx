@@ -5,13 +5,16 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { FileSelectButton } from "@/components/FileSelectButton";
+import { t, type Lang } from "@/lib/i18n/translations";
 
 export function StoreLogo({
   storeId,
   logoUrl,
+  lang = "en",
 }: {
   storeId: string;
   logoUrl: string | null;
+  lang?: Lang;
 }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,7 +73,7 @@ export function StoreLogo({
             <Image src={logoUrl} alt="Store logo" fill className="object-cover" unoptimized />
           ) : (
             <div className="flex h-full items-center justify-center text-xs text-stone-400">
-              No logo
+              {t(lang, "no_logo_text")}
             </div>
           )}
         </div>
@@ -80,10 +83,11 @@ export function StoreLogo({
             inputRef={fileInputRef}
             fileName={fileName}
             accept="image/*"
+            lang={lang}
             onChange={handleFileChange}
             disabled={uploading}
           />
-          {uploading && <p className="mt-1 text-sm text-stone-500">Uploading...</p>}
+          {uploading && <p className="mt-1 text-sm text-stone-500">{t(lang, "uploading_msg")}</p>}
           {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
         </div>
       </div>

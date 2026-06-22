@@ -4,8 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/CartContext";
 import { useToast } from "@/lib/toast/ToastContext";
+import { formatPrice } from "@/lib/format";
+import { t, type Lang } from "@/lib/i18n/translations";
 
-export function CartView({ storeSlug }: { storeSlug: string }) {
+export function CartView({ storeSlug, storeCurrency, lang }: { storeSlug: string; storeCurrency: string; lang: Lang }) {
   const { items, setQuantity, removeItem, totalAmount } = useCart();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -18,12 +20,12 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
   if (items.length === 0) {
     return (
       <div>
-        <p className="text-stone-600">Your cart is empty.</p>
+        <p className="text-stone-600">{t(lang, "cart_empty_msg")}</p>
         <Link
           href={`/store/${storeSlug}`}
           className="mt-4 inline-block text-sm text-stone-900 underline"
         >
-          Continue shopping
+          {t(lang, "continue_shopping_link")}
         </Link>
       </div>
     );
@@ -60,7 +62,7 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
 
       window.location.href = data.url;
     } catch {
-      const message = "Something went wrong. Please try again.";
+      const message = t(lang, "something_wrong");
       setError(message);
       showToast(message, "error");
       setSubmitting(false);
@@ -68,15 +70,15 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
   }
 
   return (
-    <div>
-      <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm">
+    <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+      <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-stone-50 text-stone-600">
             <tr>
-              <th className="px-4 py-2 font-medium">Product</th>
-              <th className="px-4 py-2 font-medium">Price</th>
-              <th className="px-4 py-2 font-medium">Qty</th>
-              <th className="px-4 py-2 font-medium">Subtotal</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "product_col")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "price_col")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "qty_col")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "subtotal_col")}</th>
               <th className="px-4 py-2 font-medium"></th>
             </tr>
           </thead>
@@ -85,7 +87,7 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
               <tr key={item.productId} className="border-t border-stone-200">
                 <td className="px-4 py-2 font-medium">{item.name}</td>
                 <td className="px-4 py-2 text-stone-600">
-                  ${(item.price / 100).toFixed(2)}
+                  {formatPrice(item.price, storeCurrency)}
                 </td>
                 <td className="px-4 py-2">
                   <input
@@ -99,7 +101,7 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
                   />
                 </td>
                 <td className="px-4 py-2 text-stone-600">
-                  ${((item.price * item.quantity) / 100).toFixed(2)}
+                  {formatPrice(item.price * item.quantity, storeCurrency)}
                 </td>
                 <td className="px-4 py-2 text-right">
                   <button
@@ -107,7 +109,7 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
                     onClick={() => removeItem(item.productId)}
                     className="text-sm text-red-600 hover:text-red-800"
                   >
-                    Remove
+                    {t(lang, "remove_btn")}
                   </button>
                 </td>
               </tr>
@@ -117,15 +119,17 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
       </div>
 
       <div className="mt-4 flex justify-end text-lg font-semibold">
-        Total: ${(totalAmount / 100).toFixed(2)}
+        {t(lang, "total_label")} {formatPrice(totalAmount, storeCurrency)}
       </div>
 
-      <form onSubmit={handleCheckout} className="mt-8 flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Shipping details</h2>
+      <hr className="my-6 border-stone-200" />
+
+      <form onSubmit={handleCheckout} className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold">{t(lang, "shipping_details_heading")}</h2>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="name" className="text-sm font-medium">
-            Full name
+            {t(lang, "full_name_label")}
           </label>
           <input
             id="name"
@@ -133,13 +137,13 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="rounded-md border border-stone-300 bg-stone-100 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+            className="rounded-md border border-stone-300 bg-stone-50 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
           />
         </div>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="email" className="text-sm font-medium">
-            Email
+            {t(lang, "email_field_label")}
           </label>
           <input
             id="email"
@@ -147,33 +151,33 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded-md border border-stone-300 bg-stone-100 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+            className="rounded-md border border-stone-300 bg-stone-50 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
           />
         </div>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="phone" className="text-sm font-medium">
-            Phone (optional)
+            {t(lang, "phone_optional_label")}
           </label>
           <input
             id="phone"
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="rounded-md border border-stone-300 bg-stone-100 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+            className="rounded-md border border-stone-300 bg-stone-50 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
           />
         </div>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="address" className="text-sm font-medium">
-            Shipping address (optional)
+            {t(lang, "shipping_address_label")}
           </label>
           <textarea
             id="address"
             rows={3}
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="rounded-md border border-stone-300 bg-stone-100 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+            className="rounded-md border border-stone-300 bg-stone-50 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
           />
         </div>
 
@@ -184,7 +188,7 @@ export function CartView({ storeSlug }: { storeSlug: string }) {
           disabled={submitting}
           className="rounded-md bg-[var(--store-primary)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)] disabled:opacity-50"
         >
-          {submitting ? "Redirecting to payment..." : "Checkout"}
+          {submitting ? t(lang, "redirecting_payment_msg") : t(lang, "checkout_btn")}
         </button>
       </form>
     </div>

@@ -4,10 +4,11 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { FileSelectButton } from "@/components/FileSelectButton";
+import { t, type Lang } from "@/lib/i18n/translations";
 
 type StagedImage = { path: string; url: string };
 
-export function NewProductImages({ storeId, productId }: { storeId: string; productId: string }) {
+export function NewProductImages({ storeId, productId, lang = "en" }: { storeId: string; productId: string; lang?: Lang }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<StagedImage[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -68,7 +69,7 @@ export function NewProductImages({ storeId, productId }: { storeId: string; prod
                 <Image src={image.url} alt="" fill className="object-cover" unoptimized />
                 {index === 0 && (
                   <span className="absolute left-1 top-1 rounded-full bg-[var(--store-primary)] px-1.5 py-0.5 text-[10px] font-medium text-white">
-                    Primary
+                    {t(lang, "primary_badge")}
                   </span>
                 )}
               </div>
@@ -79,7 +80,7 @@ export function NewProductImages({ storeId, productId }: { storeId: string; prod
                     onClick={() => handleSetPrimary(image)}
                     className="text-stone-600 hover:text-stone-900"
                   >
-                    Make primary
+                    {t(lang, "make_primary_btn")}
                   </button>
                 )}
                 <button
@@ -87,7 +88,7 @@ export function NewProductImages({ storeId, productId }: { storeId: string; prod
                   onClick={() => handleRemove(image)}
                   className="text-red-600 hover:text-red-800"
                 >
-                  Remove
+                  {t(lang, "remove_btn")}
                 </button>
               </div>
               <input type="hidden" name="image_url" value={image.url} />
@@ -101,10 +102,11 @@ export function NewProductImages({ storeId, productId }: { storeId: string; prod
           inputRef={fileInputRef}
           fileName={fileName}
           accept="image/*"
+          lang={lang}
           onChange={handleFileChange}
           disabled={uploading}
         />
-        {uploading && <p className="mt-1 text-sm text-stone-500">Uploading...</p>}
+        {uploading && <p className="mt-1 text-sm text-stone-500">{t(lang, "uploading_msg")}</p>}
         {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       </div>
     </div>

@@ -49,7 +49,9 @@ export const PRESET_BACKGROUNDS = [
   { id: "preset-5", url: "/backgrounds/preset-5.png", label: "Midnight Gold" },
 ] as const;
 
-export const STORE_FONTS = ["sans", "serif", "rounded"] as const;
+export const LATIN_STORE_FONTS = ["sans", "serif", "rounded"] as const;
+export const ARABIC_STORE_FONTS = ["tajawal", "cairo", "amiri"] as const;
+export const STORE_FONTS = [...LATIN_STORE_FONTS, ...ARABIC_STORE_FONTS] as const;
 
 export type StoreFont = (typeof STORE_FONTS)[number];
 
@@ -57,6 +59,9 @@ export const FONT_LABELS: Record<StoreFont, string> = {
   sans: "Modern (Sans)",
   serif: "Elegant (Serif)",
   rounded: "Friendly (Rounded)",
+  tajawal: "حديث (Tajawal)",
+  cairo: "ودود (Cairo)",
+  amiri: "أنيق (Amiri)",
 };
 
 export function isStoreFont(value: string): value is StoreFont {

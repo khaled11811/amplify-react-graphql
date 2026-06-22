@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { DEFAULT_THEME_COLOR, STORE_BACKGROUND_TYPES, STORE_FONTS, PRESET_BACKGROUNDS } from "@/lib/theme";
 
+const STORE_LANGUAGE_VALUES = ["en", "ar"] as const;
+
 export const storeSchema = z.object({
   name: z.string().trim().min(2).max(100),
   slug: z
@@ -26,6 +28,8 @@ export const createStoreSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
       error: "Slug can only contain lowercase letters, numbers, and hyphens.",
     }),
+  storeType: z.enum(["paid_shop", "display_shop"]),
+  managerName: z.string().trim().max(100).optional(),
   managerEmail: z.email(),
   managerPassword: z.string().min(8, {
     error: "Password must be at least 8 characters.",
@@ -104,6 +108,7 @@ export const contactInfoSchema = z.object({
 
 export const editStoreSchema = z.object({
   name: z.string().trim().min(2).max(100),
+  managerName: z.string().trim().max(100).optional(),
   managerEmail: z.email(),
   publicEmail: z.union([z.email(), z.literal("")]).optional(),
   newPassword: z.union([
@@ -114,6 +119,8 @@ export const editStoreSchema = z.object({
 
 export const storeGeneralSchema = contactInfoSchema.extend({
   name: z.string().trim().min(2).max(100),
+  fullName: z.string().trim().max(100).optional(),
+  storeLanguage: z.enum(STORE_LANGUAGE_VALUES).optional(),
   newPassword: z.union([
     z.string().min(8, { error: "Password must be at least 8 characters." }),
     z.literal(""),

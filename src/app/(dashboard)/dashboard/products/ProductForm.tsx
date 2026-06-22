@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { Category, Product } from "@/types/database.types";
 import type { ProductActionState } from "./actions";
 import { buildCategoryTree, flattenCategoryTree } from "@/lib/categories";
 import { useActionToast } from "@/lib/toast/useActionToast";
+import { t, type Lang } from "@/lib/i18n/translations";
 import { NewProductImages } from "./NewProductImages";
 
 function slugify(value: string) {
@@ -19,15 +21,24 @@ type ProductFormProps = {
   categories: Category[];
   product?: Product;
   storeId?: string;
+  currency?: string;
+  isDisplayShop?: boolean;
+  lang?: Lang;
   action: (
     state: ProductActionState,
     formData: FormData
   ) => Promise<ProductActionState>;
 };
 
-export function ProductForm({ categories, product, storeId, action }: ProductFormProps) {
+export function ProductForm({ categories, product, storeId, currency = "usd", isDisplayShop = false, lang = "en", action }: ProductFormProps) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(action, undefined);
-  useActionToast(state, product ? "Product updated." : "Product added.");
+  useActionToast(state, t(lang, product ? "toast_product_updated" : "toast_product_added"));
+
+  useEffect(() => {
+    if (state?.redirect) router.push(state.redirect);
+  }, [state, router]);
+
   const [slug, setSlug] = useState(product?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(product));
   const [newProductId] = useState(() => crypto.randomUUID());
@@ -37,8 +48,8 @@ export function ProductForm({ categories, product, storeId, action }: ProductFor
       {!product && storeId && (
         <>
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium">Images</span>
-            <NewProductImages storeId={storeId} productId={newProductId} />
+            <span className="text-sm font-medium">{t(lang, "images_label")}</span>
+            <NewProductImages storeId={storeId} productId={newProductId} lang={lang} />
           </div>
 
           <hr className="border-stone-200" />
@@ -47,7 +58,7 @@ export function ProductForm({ categories, product, storeId, action }: ProductFor
 
       <div className="flex flex-col gap-1">
         <label htmlFor="name" className="text-sm font-medium">
-          Product name
+          {t(lang, "product_name_label")}
         </label>
         <input
           id="name"
@@ -66,7 +77,7 @@ export function ProductForm({ categories, product, storeId, action }: ProductFor
 
       <div className="flex flex-col gap-1">
         <label htmlFor="slug" className="text-sm font-medium">
-          Slug
+          {t(lang, "slug_label")}
         </label>
         <input
           id="slug"
@@ -86,7 +97,7 @@ export function ProductForm({ categories, product, storeId, action }: ProductFor
 
       <div className="flex flex-col gap-1">
         <label htmlFor="description" className="text-sm font-medium">
-          Description
+          {t(lang, "description_label")}
         </label>
         <textarea
           id="description"
@@ -100,25 +111,29 @@ export function ProductForm({ categories, product, storeId, action }: ProductFor
       <hr className="border-stone-200" />
 
       <div className="flex gap-4">
-        <div className="flex flex-1 flex-col gap-1">
-          <label htmlFor="price" className="text-sm font-medium">
-            Price (USD)
-          </label>
-          <input
-            id="price"
-            name="price"
-            type="number"
-            step="0.01"
-            min="0"
-            required
-            defaultValue={product ? (product.price / 100).toFixed(2) : undefined}
-            className="w-full min-w-0 rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
-          />
-        </div>
+        {isDisplayShop ? (
+          <input type="hidden" name="price" value="0" />
+        ) : (
+          <div className="flex flex-1 flex-col gap-1">
+            <label htmlFor="price" className="text-sm font-medium">
+              {t(lang, "price_label")}
+            </label>
+            <input
+              id="price"
+              name="price"
+              type="number"
+              step="0.01"
+              min="0"
+              required
+              defaultValue={product ? (product.price / 100).toFixed(2) : undefined}
+              className="w-full min-w-0 rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+            />
+          </div>
+        )}
 
         <div className="flex flex-1 flex-col gap-1">
           <label htmlFor="stock" className="text-sm font-medium">
-            Stock
+            {t(lang, "stock_label")}
           </label>
           <input
             id="stock"
@@ -133,13 +148,13 @@ export function ProductForm({ categories, product, storeId, action }: ProductFor
         </div>
       </div>
 
-      <input type="hidden" name="currency" value="usd" />
+      <input type="hidden" name="currency" value={currency} />
 
       <hr className="border-stone-200" />
 
       <div className="flex flex-col gap-1">
         <label htmlFor="category_id" className="text-sm font-medium">
-          Category
+          {t(lang, "category_label")}
         </label>
         <select
           id="category_id"
@@ -147,7 +162,7 @@ export function ProductForm({ categories, product, storeId, action }: ProductFor
           defaultValue={product?.category_id ?? ""}
           className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
         >
-          <option value="">No category</option>
+          <option value="">{t(lang, "no_category_option")}</option>
           {flattenCategoryTree(buildCategoryTree(categories)).map((category) => (
             <option key={category.id} value={category.id}>
               {"— ".repeat(category.depth)}
@@ -165,7 +180,7 @@ export function ProductForm({ categories, product, storeId, action }: ProductFor
           name="is_active"
           defaultChecked={product?.is_active ?? true}
         />
-        Visible in store
+        {t(lang, "visible_in_store_label")}
       </label>
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
@@ -173,9 +188,9 @@ export function ProductForm({ categories, product, storeId, action }: ProductFor
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-[var(--store-primary)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)] disabled:opacity-50"
+        className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-teal-700 disabled:opacity-50"
       >
-        {pending ? "Saving..." : product ? "Save changes" : "Create product"}
+        {pending ? t(lang, "saving_btn") : product ? t(lang, "save_changes_btn") : t(lang, "create_product_btn")}
       </button>
     </form>
   );

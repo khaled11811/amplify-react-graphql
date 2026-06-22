@@ -1,5 +1,6 @@
 import { getCurrentProfile } from "@/lib/data/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getLang } from "@/lib/i18n/server";
 import { BillingForm } from "./BillingForm";
 
 export default async function BillingSettingsPage() {
@@ -8,7 +9,7 @@ export default async function BillingSettingsPage() {
     return <p className="text-stone-600">No store assigned.</p>;
   }
 
-  const supabase = await createClient();
+  const [supabase, lang] = [await createClient(), await getLang()];
   const { data: store } = await supabase
     .from("stores")
     .select("billing_info")
@@ -19,5 +20,5 @@ export default async function BillingSettingsPage() {
     return <p className="text-stone-600">Store not found.</p>;
   }
 
-  return <BillingForm billingInfo={store.billing_info ?? {}} />;
+  return <BillingForm billingInfo={store.billing_info ?? {}} lang={lang} />;
 }
