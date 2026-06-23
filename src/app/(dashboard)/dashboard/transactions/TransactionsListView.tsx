@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getLang } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/translations";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatDateTime } from "@/lib/format";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-stone-200 text-stone-600",
@@ -58,7 +58,7 @@ export async function TransactionsListView({
               return (
                 <tr key={tx.id} className="border-t border-stone-200">
                   <td className="px-4 py-2 text-stone-600">
-                    {new Date(tx.created_at).toLocaleString()}
+                    {formatDateTime(tx.created_at)}
                   </td>
                   <td className="px-4 py-2 font-medium">
                     {order?.customer_name ?? "—"}

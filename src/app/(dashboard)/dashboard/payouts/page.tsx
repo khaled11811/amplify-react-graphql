@@ -10,7 +10,7 @@ import {
   sumAmounts,
 } from "@/lib/data/revenue";
 import { RetrievePayoutButton } from "./RetrievePayoutButton";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatDateTime } from "@/lib/format";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-stone-200 text-stone-600",
@@ -91,7 +91,7 @@ export default async function PayoutsPage() {
               {payouts?.map((payout) => (
                 <tr key={payout.id} className="border-t border-stone-200">
                   <td className="px-4 py-2 text-stone-600">
-                    {new Date(payout.requested_at).toLocaleString()}
+                    {formatDateTime(payout.requested_at)}
                   </td>
                   <td className="px-4 py-2 font-medium">
                     {formatPrice(payout.amount, storeCurrency)}
@@ -106,7 +106,7 @@ export default async function PayoutsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-2 text-stone-600">
-                    {payout.paid_at ? new Date(payout.paid_at).toLocaleString() : "—"}
+                    {payout.paid_at ? formatDateTime(payout.paid_at) : "—"}
                   </td>
                 </tr>
               ))}

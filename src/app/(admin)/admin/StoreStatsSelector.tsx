@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { t, type Lang } from "@/lib/i18n/translations";
+import { formatDateTime } from "@/lib/format";
 
 export type StoreStat = {
   id: string;
@@ -15,11 +16,6 @@ export type StoreStat = {
   lastPurchaseAt: string | null;
   managerLastLoginAt: string | null;
 };
-
-function formatDateTime(value: string | null) {
-  if (!value) return "—";
-  return new Date(value).toLocaleString("en-US");
-}
 
 export function StoreStatsSelector({ stores, lang }: { stores: StoreStat[]; lang: Lang }) {
   const [selectedId, setSelectedId] = useState(stores[0]?.id ?? "");

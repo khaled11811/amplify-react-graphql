@@ -5,7 +5,7 @@ import { getLang } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/translations";
 import type { OrderStatus } from "@/types/database.types";
 import { updateOrderStatus } from "./actions";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatDateTime } from "@/lib/format";
 
 const STATUS_OPTIONS: OrderStatus[] = ["paid", "shipped", "completed", "cancelled"];
 
@@ -67,7 +67,7 @@ export async function OrderDetailView({
       </div>
 
       <p className="mt-1 text-sm text-stone-500">
-        {t(lang, "placed_label")} {new Date(order.created_at).toLocaleString()}
+        {t(lang, "placed_label")} {formatDateTime(order.created_at)}
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 rounded-xl border border-stone-200 bg-white p-4 shadow-sm text-sm sm:grid-cols-2">
@@ -133,7 +133,7 @@ export async function OrderDetailView({
             {transactions?.map((tx) => (
               <tr key={tx.id} className="border-t border-stone-200">
                 <td className="px-4 py-2 text-stone-600">
-                  {new Date(tx.created_at).toLocaleString()}
+                  {formatDateTime(tx.created_at)}
                 </td>
                 <td className="px-4 py-2 text-stone-600">
                   {formatPrice(tx.amount, storeCurrency)}

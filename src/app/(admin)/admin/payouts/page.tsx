@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getLang } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/translations";
 import type { BillingInfo } from "@/types/database.types";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatDateTime } from "@/lib/format";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-stone-200 text-stone-600",
@@ -61,7 +61,7 @@ export default async function AdminPayoutsPage() {
               return (
                 <tr key={payout.id} className="border-t border-stone-200">
                   <td className="px-4 py-2 text-stone-600">
-                    {new Date(payout.requested_at).toLocaleString("en-US")}
+                    {formatDateTime(payout.requested_at)}
                   </td>
                   <td className="px-4 py-2 font-medium">{store?.name ?? "—"}</td>
                   <td className="px-4 py-2 text-stone-600">
@@ -80,7 +80,7 @@ export default async function AdminPayoutsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-2 text-stone-600">
-                    {payout.paid_at ? new Date(payout.paid_at).toLocaleString("en-US") : "—"}
+                    {payout.paid_at ? formatDateTime(payout.paid_at) : "—"}
                   </td>
                 </tr>
               );
