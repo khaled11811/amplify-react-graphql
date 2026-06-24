@@ -60,6 +60,9 @@ const en = {
   stat_products: "Products",
   stat_categories: "Categories",
   stat_orders: "Orders",
+  stat_paid_orders: "Paid orders",
+  stat_shipped_orders: "Shipped orders",
+  stat_completed_orders: "Completed orders",
   stat_revenue: "Revenue",
 
   // Products
@@ -474,6 +477,9 @@ const ar: typeof en = {
   stat_products: "المنتجات",
   stat_categories: "الفئات",
   stat_orders: "الطلبات",
+  stat_paid_orders: "الطلبات المدفوعة",
+  stat_shipped_orders: "الطلبات المشحونة",
+  stat_completed_orders: "الطلبات المكتملة",
   stat_revenue: "الإيرادات",
 
   new_product_heading: "منتج جديد",

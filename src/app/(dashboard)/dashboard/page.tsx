@@ -37,19 +37,25 @@ export default async function DashboardPage() {
 
   let orderCount: number | null = null;
   let revenue = "$0.00";
+  let paidCount = 0;
+  let shippedCount = 0;
+  let completedCount = 0;
 
   if (!isDisplayShop) {
     const [{ count: oc }, { data: revenueOrders }] = await Promise.all([
       supabase.from("orders").select("*", { count: "exact", head: true }).eq("store_id", profile.store_id),
       supabase
         .from("orders")
-        .select("total_amount, currency")
+        .select("total_amount, currency, status")
         .eq("store_id", profile.store_id)
         .in("status", REVENUE_STATUSES),
     ]);
     orderCount = oc;
     const totalRevenue = (revenueOrders ?? []).reduce((sum, o) => sum + o.total_amount, 0);
     revenue = formatPrice(totalRevenue, store?.currency ?? "usd");
+    paidCount = (revenueOrders ?? []).filter((o) => o.status === "paid").length;
+    shippedCount = (revenueOrders ?? []).filter((o) => o.status === "shipped").length;
+    completedCount = (revenueOrders ?? []).filter((o) => o.status === "completed").length;
   }
 
   return (
@@ -69,7 +75,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <dl className={`mt-6 grid gap-4 ${isDisplayShop ? "grid-cols-2 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-4"}`}>
+      <dl className={`mt-6 grid gap-4 ${isDisplayShop ? "grid-cols-2 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7"}`}>
         <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">
           <dt className="text-sm text-stone-600 transition-colors group-hover:text-white">{t(lang, "stat_products")}</dt>
           <dd className="mt-1 text-lg font-semibold transition-colors group-hover:text-white">{productCount ?? 0}</dd>
@@ -83,6 +89,18 @@ export default async function DashboardPage() {
             <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">
               <dt className="text-sm text-stone-600 transition-colors group-hover:text-white">{t(lang, "stat_orders")}</dt>
               <dd className="mt-1 text-lg font-semibold transition-colors group-hover:text-white">{orderCount ?? 0}</dd>
+            </div>
+            <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">
+              <dt className="text-sm text-stone-600 transition-colors group-hover:text-white">{t(lang, "stat_paid_orders")}</dt>
+              <dd className="mt-1 text-lg font-semibold transition-colors group-hover:text-white">{paidCount}</dd>
+            </div>
+            <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">
+              <dt className="text-sm text-stone-600 transition-colors group-hover:text-white">{t(lang, "stat_shipped_orders")}</dt>
+              <dd className="mt-1 text-lg font-semibold transition-colors group-hover:text-white">{shippedCount}</dd>
+            </div>
+            <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">
+              <dt className="text-sm text-stone-600 transition-colors group-hover:text-white">{t(lang, "stat_completed_orders")}</dt>
+              <dd className="mt-1 text-lg font-semibold transition-colors group-hover:text-white">{completedCount}</dd>
             </div>
             <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">
               <dt className="text-sm text-stone-600 transition-colors group-hover:text-white">{t(lang, "stat_revenue")}</dt>
