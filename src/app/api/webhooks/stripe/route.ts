@@ -20,7 +20,15 @@ export async function POST(request: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch {
-    return NextResponse.json({ error: "Invalid signature." }, { status: 400 });
+    try {
+      event = stripe.webhooks.constructEvent(
+        body,
+        signature,
+        process.env.STRIPE_CONNECT_WEBHOOK_SECRET!
+      );
+    } catch {
+      return NextResponse.json({ error: "Invalid signature." }, { status: 400 });
+    }
   }
 
   if (event.type === "checkout.session.completed") {
