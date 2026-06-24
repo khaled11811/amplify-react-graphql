@@ -116,7 +116,7 @@ export default async function StorePage({
                 {product.description}
               </p>
             )}
-            <div className="mt-2 flex flex-col gap-1 sm:mt-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-auto flex flex-col gap-1 pt-2 sm:flex-row sm:items-center sm:justify-between sm:pt-3">
               <span className="text-xs font-semibold sm:text-base">
                 {formatPrice(product.price, store.currency)}
               </span>
