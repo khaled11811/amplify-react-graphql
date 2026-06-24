@@ -7,8 +7,8 @@ import { AppHeader } from "@/components/AppHeader";
 
 const BASE_NAV = ["nav_overview", "nav_products", "nav_categories", "nav_settings"] as const;
 const BASE_HREFS = ["/dashboard", "/dashboard/products", "/dashboard/categories", "/dashboard/settings"];
-const PAID_NAV = ["nav_orders", "nav_transactions", "nav_payouts"] as const;
-const PAID_HREFS = ["/dashboard/orders", "/dashboard/transactions", "/dashboard/payouts"];
+const PAID_NAV = ["nav_orders", "nav_transactions"] as const;
+const PAID_HREFS = ["/dashboard/orders", "/dashboard/transactions"];
 
 export default async function DashboardLayout({
   children,
