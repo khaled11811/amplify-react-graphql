@@ -34,7 +34,28 @@ export async function POST(request: Request) {
     }
   }
 
+  if (event.type === "account.updated") {
+    await handleAccountUpdated(event.data.object as Stripe.Account);
+  }
+
   return NextResponse.json({ received: true });
+}
+
+async function handleAccountUpdated(account: Stripe.Account) {
+  const adminClient = createAdminClient();
+  const status = account.charges_enabled
+    ? "complete"
+    : account.details_submitted
+      ? "pending"
+      : "not_started";
+
+  await adminClient
+    .from("stores")
+    .update({
+      stripe_charges_enabled: account.charges_enabled ?? false,
+      stripe_onboarding_status: status,
+    })
+    .eq("stripe_account_id", account.id);
 }
 
 async function handleSignupPayment(

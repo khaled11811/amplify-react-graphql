@@ -47,6 +47,7 @@ export function CartView({ storeSlug, storeCurrency, lang }: { storeSlug: string
             productId: i.productId,
             quantity: i.quantity,
           })),
+          lang,
         }),
       });
 

@@ -5,6 +5,7 @@ import { CopyStoreLink } from "./CopyStoreLink";
 import { formatPrice } from "@/lib/format";
 import { getLang } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/translations";
+import { ConnectOnboardingBanner } from "@/components/ConnectOnboardingBanner";
 
 const REVENUE_STATUSES: OrderStatus[] = ["paid", "shipped", "completed"];
 
@@ -61,6 +62,12 @@ export default async function DashboardPage() {
       )}
 
       {store?.slug && <CopyStoreLink slug={store.slug} lang={lang} />}
+
+      {!isDisplayShop && !store?.stripe_charges_enabled && (
+        <div className="mt-4">
+          <ConnectOnboardingBanner lang={lang} />
+        </div>
+      )}
 
       <dl className={`mt-6 grid gap-4 ${isDisplayShop ? "grid-cols-2 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-4"}`}>
         <div className="group rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:bg-teal-600 hover:border-teal-600">

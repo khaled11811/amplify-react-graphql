@@ -70,10 +70,15 @@ export type Store = {
   currency: string;
   billing_info: BillingInfo;
   contact_info: ContactInfo;
+  stripe_account_id: string | null;
+  stripe_charges_enabled: boolean;
+  stripe_onboarding_status: StripeOnboardingStatus;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
 };
+
+export type StripeOnboardingStatus = "not_started" | "pending" | "complete";
 
 export type Category = {
   id: string;

@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe/server";
 import { checkoutSchema } from "@/lib/validators/checkout";
+import { t, type Lang } from "@/lib/i18n/translations";
 
 export async function POST(request: Request) {
   const body = await request.json();
+  const lang: Lang = body?.lang === "ar" ? "ar" : "en";
   const parsed = checkoutSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -26,6 +28,13 @@ export async function POST(request: Request) {
 
   if (!store) {
     return NextResponse.json({ error: "Store not found." }, { status: 404 });
+  }
+
+  if (!store.stripe_account_id || !store.stripe_charges_enabled) {
+    return NextResponse.json(
+      { error: t(lang, "checkout_blocked_error") },
+      { status: 400 }
+    );
   }
 
   const productIds = items.map((i) => i.productId);
@@ -89,6 +98,9 @@ export async function POST(request: Request) {
       customer_phone: customer.phone || "",
       customer_address: (customer.address || "").slice(0, 500),
       items: itemsMeta,
+    },
+    payment_intent_data: {
+      transfer_data: { destination: store.stripe_account_id },
     },
     success_url: `${origin}/store/${storeSlug}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/store/${storeSlug}/cart`,

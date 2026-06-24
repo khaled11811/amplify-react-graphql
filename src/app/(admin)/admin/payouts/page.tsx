@@ -1,12 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { getLang } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/translations";
-import type { BillingInfo } from "@/types/database.types";
+import type { BillingInfo, StripeOnboardingStatus } from "@/types/database.types";
 import { formatPrice, formatDateTime } from "@/lib/format";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-stone-200 text-stone-600",
   paid: "bg-green-100 text-green-700",
+};
+
+const ONBOARDING_STATUS_KEYS: Record<StripeOnboardingStatus, "connect_status_not_started" | "connect_status_pending" | "connect_status_complete"> = {
+  not_started: "connect_status_not_started",
+  pending: "connect_status_pending",
+  complete: "connect_status_complete",
 };
 
 function formatBillingInfo(billingInfo: BillingInfo, noBillingText: string): string {
@@ -25,10 +31,14 @@ export default async function AdminPayoutsPage() {
   const supabase = await createClient();
   const lang = await getLang();
 
-  const { data: payouts } = await supabase
-    .from("payouts")
-    .select("*")
-    .order("requested_at", { ascending: false });
+  const [{ data: connectStores }, { data: payouts }] = await Promise.all([
+    supabase
+      .from("stores")
+      .select("id, name, stripe_onboarding_status, stripe_charges_enabled")
+      .is("deleted_at", null)
+      .order("name"),
+    supabase.from("payouts").select("*").order("requested_at", { ascending: false }),
+  ]);
 
   const storeIds = [...new Set((payouts ?? []).map((p) => p.store_id))];
   const { data: stores } = storeIds.length
@@ -41,9 +51,32 @@ export default async function AdminPayoutsPage() {
   return (
     <div>
       <h1 className="text-2xl font-semibold text-stone-900">{t(lang, "payouts_heading")}</h1>
-      <p className="mt-1 text-sm text-stone-600">{t(lang, "admin_payouts_desc")}</p>
 
       <div className="mt-6 overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-stone-50 text-stone-600">
+            <tr>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_name")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_onboarding_status")}</th>
+              <th className="px-4 py-2 font-medium">{t(lang, "col_charges_enabled")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {connectStores?.map((store) => (
+              <tr key={store.id} className="border-t border-stone-200">
+                <td className="px-4 py-2 font-medium">{store.name}</td>
+                <td className="px-4 py-2 text-stone-600">{t(lang, ONBOARDING_STATUS_KEYS[store.stripe_onboarding_status])}</td>
+                <td className="px-4 py-2">{store.stripe_charges_enabled ? "✅" : "❌"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 className="mt-8 text-sm font-medium text-stone-900">{t(lang, "legacy_payouts_heading")}</h2>
+      <p className="mt-1 text-sm text-stone-600">{t(lang, "admin_payouts_desc")}</p>
+
+      <div className="mt-2 overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="bg-stone-50 text-stone-600">
             <tr>
