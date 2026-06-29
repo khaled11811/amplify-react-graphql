@@ -14,11 +14,13 @@ export function DeleteButton({
   label,
   lang = "en",
   className = "text-sm text-red-600 hover:text-red-800",
+  confirmMessage,
 }: {
   action: () => Promise<{ error: string } | undefined | void> | void;
   label?: string;
   lang?: Lang;
   className?: string;
+  confirmMessage?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -50,7 +52,7 @@ export function DeleteButton({
               <WarningIcon className="h-6 w-6 text-red-600" />
             </div>
             <h2 className="mt-4 text-lg font-semibold text-stone-900 text-center">{t(lang, "delete_confirm_heading")}</h2>
-            <p className="mt-1 text-sm text-stone-600 text-center">{t(lang, "delete_confirm_msg")}</p>
+            <p className="mt-1 text-sm text-stone-600 text-center">{confirmMessage ?? t(lang, "delete_confirm_msg")}</p>
             <div className="mt-5 flex gap-3">
               <button
                 type="button"

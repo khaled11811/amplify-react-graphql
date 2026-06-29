@@ -250,6 +250,7 @@ const en = {
   // Delete button dialog
   delete_confirm_heading: "Are you sure?",
   delete_confirm_msg: "This action cannot be undone.",
+  delete_store_confirm_msg: "Deleting this store will remove everything associated with it — products, categories, orders, and transactions. This action cannot be undone.",
   cancel_btn: "Cancel",
   delete_btn: "Delete",
   edit_btn: "Edit",
@@ -654,6 +655,7 @@ const ar: typeof en = {
 
   delete_confirm_heading: "هل أنت متأكد؟",
   delete_confirm_msg: "لا يمكن التراجع عن هذا الإجراء.",
+  delete_store_confirm_msg: "سيؤدي حذف هذا المتجر إلى إزالة كل ما يتعلق به — المنتجات والفئات والطلبات والمعاملات. لا يمكن التراجع عن هذا الإجراء.",
   cancel_btn: "إلغاء",
   delete_btn: "حذف",
   edit_btn: "تعديل",

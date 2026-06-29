@@ -262,7 +262,11 @@ export function StoresClient({
                       </>
                     )}
                     {store.deleted_at === null && (
-                      <DeleteButton action={deleteStore.bind(null, store.id)} lang={lang} />
+                      <DeleteButton
+                        action={deleteStore.bind(null, store.id)}
+                        lang={lang}
+                        confirmMessage={t(lang, "delete_store_confirm_msg")}
+                      />
                     )}
                   </div>
                 </td>
