@@ -112,9 +112,8 @@ export function StoresClient({
     if (filter === "free" && s.subscription_type !== "free") return false;
 
     if (statusFilter === "deleted") return s.deleted_at !== null;
-    if (s.deleted_at !== null) return false;
-    if (statusFilter === "active") return s.status === "active";
-    if (statusFilter === "suspended") return s.status === "suspended";
+    if (statusFilter === "active") return s.deleted_at === null && s.status === "active";
+    if (statusFilter === "suspended") return s.deleted_at === null && s.status === "suspended";
     return true;
   });
 
