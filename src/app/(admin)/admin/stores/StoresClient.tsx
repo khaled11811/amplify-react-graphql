@@ -15,9 +15,11 @@ type Store = {
   subscription_type: string;
   status: string;
   owner_id: string;
+  deleted_at: string | null;
 };
 
 type Filter = "all" | "paid" | "free";
+type StatusFilter = "all" | "active" | "suspended" | "deleted";
 
 function SubscriptionFeeModal({
   lang,
@@ -102,11 +104,17 @@ export function StoresClient({
   currentFeeAed: number;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [feeModalOpen, setFeeModalOpen] = useState(false);
 
   const filtered = stores.filter((s) => {
-    if (filter === "paid") return s.subscription_type === "paid";
-    if (filter === "free") return s.subscription_type === "free";
+    if (filter === "paid" && s.subscription_type !== "paid") return false;
+    if (filter === "free" && s.subscription_type !== "free") return false;
+
+    if (statusFilter === "deleted") return s.deleted_at !== null;
+    if (s.deleted_at !== null) return false;
+    if (statusFilter === "active") return s.status === "active";
+    if (statusFilter === "suspended") return s.status === "suspended";
     return true;
   });
 
@@ -114,6 +122,13 @@ export function StoresClient({
     { value: "all", label: t(lang, "filter_all_stores") },
     { value: "paid", label: t(lang, "filter_paid_stores") },
     { value: "free", label: t(lang, "filter_free_stores") },
+  ];
+
+  const statusFilterOptions: { value: StatusFilter; label: string }[] = [
+    { value: "all", label: t(lang, "filter_all_statuses") },
+    { value: "active", label: t(lang, "store_status_active") },
+    { value: "suspended", label: t(lang, "store_status_suspended") },
+    { value: "deleted", label: t(lang, "store_status_deleted") },
   ];
 
   return (
@@ -134,6 +149,17 @@ export function StoresClient({
           dir={lang === "ar" ? "rtl" : "ltr"}
         >
           {filterOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+          className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-700 focus:outline-2 focus:outline-stone-900"
+          dir={lang === "ar" ? "rtl" : "ltr"}
+        >
+          {statusFilterOptions.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
@@ -204,29 +230,41 @@ export function StoresClient({
                 </td>
                 <td className="px-4 py-2">
                   <span className={
-                    store.status === "active"
-                      ? "rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"
-                      : "rounded-full bg-stone-200 px-2 py-0.5 text-xs font-medium text-stone-600"
+                    store.deleted_at !== null
+                      ? "rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700"
+                      : store.status === "active"
+                        ? "rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"
+                        : "rounded-full bg-stone-200 px-2 py-0.5 text-xs font-medium text-stone-600"
                   }>
-                    {store.status}
+                    {store.deleted_at !== null
+                      ? t(lang, "store_status_deleted")
+                      : store.status === "active"
+                        ? t(lang, "store_status_active")
+                        : t(lang, "store_status_suspended")}
                   </span>
                 </td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex items-center justify-end gap-3">
-                    <Link
-                      href={`/admin/stores/${store.id}/edit`}
-                      className="text-sm text-stone-600 hover:text-stone-900"
-                    >
-                      {t(lang, "action_edit")}
-                    </Link>
-                    <form action={toggleStoreStatus.bind(null, store.id, store.status)}>
-                      <button type="submit" className="text-sm text-stone-600 hover:text-stone-900">
-                        {store.status === "active"
-                          ? t(lang, "action_suspend")
-                          : t(lang, "action_activate")}
-                      </button>
-                    </form>
-                    <DeleteButton action={deleteStore.bind(null, store.id)} lang={lang} />
+                    {store.deleted_at === null && (
+                      <>
+                        <Link
+                          href={`/admin/stores/${store.id}/edit`}
+                          className="text-sm text-stone-600 hover:text-stone-900"
+                        >
+                          {t(lang, "action_edit")}
+                        </Link>
+                        <form action={toggleStoreStatus.bind(null, store.id, store.status)}>
+                          <button type="submit" className="text-sm text-stone-600 hover:text-stone-900">
+                            {store.status === "active"
+                              ? t(lang, "action_suspend")
+                              : t(lang, "action_activate")}
+                          </button>
+                        </form>
+                      </>
+                    )}
+                    {store.deleted_at === null && (
+                      <DeleteButton action={deleteStore.bind(null, store.id)} lang={lang} />
+                    )}
                   </div>
                 </td>
               </tr>

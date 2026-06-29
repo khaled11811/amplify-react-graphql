@@ -11,8 +11,7 @@ export default async function AdminStoresPage() {
 
   const { data: stores } = await supabase
     .from("stores")
-    .select("id, name, slug, store_type, subscription_type, status, owner_id")
-    .is("deleted_at", null)
+    .select("id, name, slug, store_type, subscription_type, status, owner_id, deleted_at")
     .order("created_at", { ascending: false });
 
   const ownerIds = stores?.map((s) => s.owner_id) ?? [];
@@ -52,6 +51,7 @@ export default async function AdminStoresPage() {
           subscription_type: string;
           status: string;
           owner_id: string;
+          deleted_at: string | null;
         }[]}
         ownerEmailById={ownerEmailById as Map<string, string>}
         lang={lang}
