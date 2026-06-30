@@ -1,12 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { getLang } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/translations";
 import { QueryToast } from "@/lib/toast/QueryToast";
 import { deleteProduct } from "./actions";
 import { formatPrice } from "@/lib/format";
 import { DeleteButton } from "@/components/DeleteButton";
+import { StarDisplay } from "@/components/StarDisplay";
 
 export async function ProductsListView({
   storeId,
@@ -52,6 +54,20 @@ export async function ProductsListView({
 
   const imageByProduct = new Map(images?.map((i) => [i.product_id, i.image_url]));
 
+  const adminClient = createAdminClient();
+  const { data: ratingRows } = productIds.length
+    ? await adminClient.from("ratings").select("product_id, rating").in("product_id", productIds)
+    : { data: [] };
+
+  type RatingStat = { avg: number | null; count: number };
+  const ratingByProduct = new Map<string, RatingStat>();
+  for (const r of ratingRows ?? []) {
+    const prev = ratingByProduct.get(r.product_id) ?? { avg: null, count: 0, _sum: 0 };
+    const sum = ((prev as { avg: number | null; count: number; _sum?: number })._sum ?? 0) + r.rating;
+    const count = prev.count + 1;
+    ratingByProduct.set(r.product_id, { avg: Math.round((sum / count) * 10) / 10, count, _sum: sum } as RatingStat & { _sum: number });
+  }
+
   return (
     <div>
       <QueryToast param="updated" message="Product updated successfully." />
@@ -84,6 +100,7 @@ export async function ProductsListView({
               <th className="px-4 py-2 font-medium">{t(lang, "col_category")}</th>
               <th className="px-4 py-2 font-medium">{t(lang, "col_price")}</th>
               <th className="px-4 py-2 font-medium">{t(lang, "stock_label")}</th>
+              <th className="px-4 py-2 font-medium">{lang === "ar" ? "التقييم" : "Rating"}</th>
               <th className="px-4 py-2 font-medium">{t(lang, "col_status")}</th>
               <th className="px-4 py-2 font-medium"></th>
             </tr>
@@ -115,6 +132,14 @@ export async function ProductsListView({
                 </td>
                 <td className="px-4 py-2 text-stone-600">{product.stock}</td>
                 <td className="px-4 py-2">
+                  {(() => {
+                    const stat = ratingByProduct.get(product.id);
+                    return stat?.count
+                      ? <StarDisplay avgRating={stat.avg} ratingCount={stat.count} />
+                      : <span className="text-xs text-stone-400">{lang === "ar" ? "لا يوجد" : "None"}</span>;
+                  })()}
+                </td>
+                <td className="px-4 py-2">
                   <span
                     className={
                       product.is_active
@@ -140,7 +165,7 @@ export async function ProductsListView({
             ))}
             {!products?.length && (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-stone-500">
+                <td colSpan={8} className="px-4 py-6 text-center text-stone-500">
                   {searchQuery
                     ? `${t(lang, "no_products_matching_dashboard")} "${searchQuery}".`
                     : t(lang, "no_products_dashboard")}
