@@ -1,10 +1,15 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import type { Product, ProductImage } from "@/types/database.types";
 import { buildCategoryTree, type CategoryNode } from "@/lib/categories";
 
-export type ProductWithImages = Product & { images: ProductImage[] };
+export type ProductWithImages = Product & {
+  images: ProductImage[];
+  avg_rating: number | null;
+  rating_count: number;
+};
 
 async function attachImages(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -12,11 +17,20 @@ async function attachImages(
 ): Promise<ProductWithImages[]> {
   if (products.length === 0) return [];
 
-  const { data: images } = await supabase
-    .from("product_images")
-    .select("*")
-    .in("product_id", products.map((p) => p.id))
-    .order("sort_order", { ascending: true });
+  const productIds = products.map((p) => p.id);
+
+  const adminClient = createAdminClient();
+  const [{ data: images }, { data: ratingRows }] = await Promise.all([
+    supabase
+      .from("product_images")
+      .select("*")
+      .in("product_id", productIds)
+      .order("sort_order", { ascending: true }),
+    adminClient
+      .from("ratings")
+      .select("product_id, rating")
+      .in("product_id", productIds),
+  ]);
 
   const imagesByProduct = new Map<string, ProductImage[]>();
   for (const image of images ?? []) {
@@ -25,10 +39,27 @@ async function attachImages(
     imagesByProduct.set(image.product_id, list);
   }
 
-  return products.map((product) => ({
-    ...product,
-    images: imagesByProduct.get(product.id) ?? [],
-  }));
+  const ratingsByProduct = new Map<string, number[]>();
+  for (const r of ratingRows ?? []) {
+    const list = ratingsByProduct.get(r.product_id) ?? [];
+    list.push(r.rating);
+    ratingsByProduct.set(r.product_id, list);
+  }
+
+  return products.map((product) => {
+    const productRatings = ratingsByProduct.get(product.id) ?? [];
+    const rating_count = productRatings.length;
+    const avg_rating =
+      rating_count > 0
+        ? Math.round((productRatings.reduce((a, b) => a + b, 0) / rating_count) * 10) / 10
+        : null;
+    return {
+      ...product,
+      images: imagesByProduct.get(product.id) ?? [],
+      avg_rating,
+      rating_count,
+    };
+  });
 }
 
 export const getStoreBySlug = cache(async (slug: string) => {

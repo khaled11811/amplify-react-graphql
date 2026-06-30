@@ -10,6 +10,7 @@ import { t, type Lang } from "@/lib/i18n/translations";
 import { AddToCartButton } from "./AddToCartButton";
 import { CategoryDropdown } from "./CategoryDropdown";
 import { formatPrice } from "@/lib/format";
+import { StarDisplay } from "@/components/StarDisplay";
 
 const PAGE_SIZE = 30;
 
@@ -110,6 +111,7 @@ export default async function StorePage({
                 )}
               </div>
               <h2 className="mt-2 line-clamp-2 text-xs font-medium hover:underline sm:text-base">{product.name}</h2>
+              <StarDisplay avgRating={product.avg_rating} ratingCount={product.rating_count} size="xs" />
             </Link>
             {product.description && (
               <p className="mt-1 line-clamp-2 hidden text-sm text-stone-600 sm:block">

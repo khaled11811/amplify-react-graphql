@@ -131,6 +131,59 @@ export async function sendSignupWelcomeEmail(data: SignupWelcomeEmailData): Prom
   });
 }
 
+export type RatingRequestEmailData = {
+  customerEmail: string;
+  customerName: string;
+  storeName: string;
+  ratingUrl: string;
+  items: { product_name: string }[];
+};
+
+export async function sendRatingRequestEmail(data: RatingRequestEmailData): Promise<void> {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const productList = data.items
+    .map((i) => `<li style="margin:4px 0;color:#57534e;">${i.product_name}</li>`)
+    .join("");
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family:sans-serif;color:#1c1917;background:#f5f5f4;margin:0;padding:0;">
+  <div style="max-width:600px;margin:40px auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e7e5e4;">
+    <div style="background:#0d9488;padding:24px 32px;">
+      <h1 style="margin:0;color:#ffffff;font-size:20px;">${data.storeName}</h1>
+    </div>
+    <div style="padding:32px;">
+      <p style="margin:0 0 8px;">Hi ${data.customerName},</p>
+      <p style="margin:0 0 24px;color:#57534e;">Your order has been completed! We'd love to hear what you think.</p>
+      <div style="background:#f5f5f4;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+        <p style="margin:0 0 8px;font-size:13px;color:#78716c;font-weight:600;">Items in your order:</p>
+        <ul style="margin:0;padding-left:20px;">${productList}</ul>
+      </div>
+      <div style="text-align:center;">
+        <a href="${data.ratingUrl}" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:15px;font-weight:600;">
+          ⭐ Rate your purchase
+        </a>
+      </div>
+      <p style="margin:20px 0 0;font-size:12px;color:#a8a29e;text-align:center;">This link is unique to your order and can only be used once.</p>
+    </div>
+    <div style="padding:16px 32px;background:#f5f5f4;font-size:12px;color:#a8a29e;text-align:center;">
+      You are receiving this email because you placed an order at ${data.storeName}.
+    </div>
+  </div>
+</body>
+</html>`;
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: data.customerEmail,
+    subject: `How was your order from ${data.storeName}? Leave a rating ⭐`,
+    html,
+  });
+}
+
 export async function sendOrderEmail(data: OrderEmailData): Promise<void> {
   if (!process.env.RESEND_API_KEY) return;
 

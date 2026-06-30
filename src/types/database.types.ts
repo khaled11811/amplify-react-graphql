@@ -122,8 +122,19 @@ export type Order = {
   status: OrderStatus;
   total_amount: number;
   currency: string;
+  rating_token: string | null;
+  rating_email_sent_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type Rating = {
+  id: string;
+  order_id: string;
+  product_id: string;
+  store_id: string;
+  rating: number;
+  created_at: string;
 };
 
 export type OrderItem = {
@@ -208,6 +219,7 @@ export type Database = {
       app_settings: Table<AppSetting>;
       pending_signups: Table<PendingSignup>;
       subscription_payments: Table<SubscriptionPayment>;
+      ratings: Table<Rating>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

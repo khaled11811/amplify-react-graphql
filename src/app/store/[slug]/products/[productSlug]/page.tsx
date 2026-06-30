@@ -6,6 +6,7 @@ import { AddToCartButton } from "../../AddToCartButton";
 import { ProductGallery } from "./ProductGallery";
 import { InquiryModal } from "./InquiryModal";
 import { formatPrice } from "@/lib/format";
+import { StarDisplay } from "@/components/StarDisplay";
 
 export default async function ProductPage({
   params,
@@ -38,6 +39,9 @@ export default async function ProductPage({
 
       <div className="mt-4 rounded-xl bg-white/80 p-4 shadow-sm backdrop-blur-sm">
         <h1 className="text-2xl font-semibold">{product.name}</h1>
+        <div className="mt-1">
+          <StarDisplay avgRating={product.avg_rating} ratingCount={product.rating_count} />
+        </div>
         {product.description && (
           <p className="mt-2 text-stone-600">{product.description}</p>
         )}

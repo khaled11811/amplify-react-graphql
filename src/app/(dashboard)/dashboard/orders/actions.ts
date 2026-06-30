@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { canAccessStore, getCurrentProfile } from "@/lib/data/auth";
-import { sendOrderEmail } from "@/lib/email";
+import { sendOrderEmail, sendRatingRequestEmail } from "@/lib/email";
 import type { OrderStatus } from "@/types/database.types";
 
 const VALID_STATUSES: OrderStatus[] = [
@@ -48,6 +49,39 @@ export async function updateOrderStatus(storeId: string, orderId: string, formDa
       currency: store?.currency ?? order.currency,
       items: items ?? [],
     });
+
+    // When order is completed, send rating request email (once per order)
+    if (status === "completed" && !order.rating_email_sent_at) {
+      const adminClient = createAdminClient();
+
+      // Ensure rating_token exists (backfill if somehow null)
+      let token = order.rating_token;
+      if (!token) {
+        const { data: refreshed } = await adminClient
+          .from("orders")
+          .update({ rating_token: crypto.randomUUID() })
+          .eq("id", orderId)
+          .select("rating_token")
+          .single();
+        token = refreshed?.rating_token ?? null;
+      }
+
+      if (token) {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+        await sendRatingRequestEmail({
+          customerEmail: order.customer_email,
+          customerName: order.customer_name,
+          storeName: store?.name ?? "The Store",
+          ratingUrl: `${siteUrl}/rate?token=${token}`,
+          items: items ?? [],
+        });
+
+        await adminClient
+          .from("orders")
+          .update({ rating_email_sent_at: new Date().toISOString() })
+          .eq("id", orderId);
+      }
+    }
   }
 
   revalidatePath("/dashboard/orders");
