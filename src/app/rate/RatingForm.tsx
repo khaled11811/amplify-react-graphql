@@ -3,6 +3,29 @@
 import { useState } from "react";
 import Image from "next/image";
 
+type Lang = "en" | "ar";
+
+const copy = {
+  en: {
+    submit: "Submit ratings",
+    submitting: "Submitting…",
+    rate_all: "Please rate all items to continue",
+    thanks_heading: "Thank you for your feedback!",
+    thanks_msg: (store: string) => `Your rating helps other shoppers at ${store}.`,
+    error_default: "Something went wrong. Please try again.",
+    error_already: "Already rated.",
+  },
+  ar: {
+    submit: "إرسال التقييمات",
+    submitting: "جارٍ الإرسال…",
+    rate_all: "يرجى تقييم جميع المنتجات للمتابعة",
+    thanks_heading: "شكراً على ملاحظاتك!",
+    thanks_msg: (store: string) => `تقييمك يساعد المتسوقين الآخرين في ${store}.`,
+    error_default: "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    error_already: "تم التقييم مسبقاً.",
+  },
+};
+
 type RatingItem = {
   productId: string;
   productName: string;
@@ -12,14 +35,17 @@ type RatingItem = {
 function StarPicker({
   value,
   onChange,
+  dir,
 }: {
   value: number;
   onChange: (v: number) => void;
+  dir: "ltr" | "rtl";
 }) {
   const [hovered, setHovered] = useState(0);
+  const stars = dir === "rtl" ? [5, 4, 3, 2, 1] : [1, 2, 3, 4, 5];
 
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-1" dir="ltr">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
@@ -43,11 +69,16 @@ export function RatingForm({
   token,
   storeName,
   items,
+  lang = "en",
 }: {
   token: string;
   storeName: string;
   items: RatingItem[];
+  lang?: Lang;
 }) {
+  const c = copy[lang];
+  const dir = lang === "ar" ? "rtl" : "ltr";
+
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -71,33 +102,33 @@ export function RatingForm({
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(data.error ?? c.error_default);
         setSubmitting(false);
         return;
       }
       setDone(true);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(c.error_default);
       setSubmitting(false);
     }
   }
 
   if (done) {
     return (
-      <div className="text-center py-8">
+      <div className="text-center py-8" dir={dir}>
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-teal-100">
           <svg className="h-7 w-7 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-xl font-semibold text-stone-900">Thank you for your feedback!</h2>
-        <p className="mt-2 text-stone-500">Your rating helps other shoppers at {storeName}.</p>
+        <h2 className="text-xl font-semibold text-stone-900">{c.thanks_heading}</h2>
+        <p className="mt-2 text-stone-500">{c.thanks_msg(storeName)}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5" dir={dir}>
       {items.map((item) => (
         <div key={item.productId} className="flex items-center gap-4 rounded-xl border border-stone-200 p-4">
           {item.imageUrl && (
@@ -110,6 +141,7 @@ export function RatingForm({
             <StarPicker
               value={ratings[item.productId] ?? 0}
               onChange={(v) => setRatings((prev) => ({ ...prev, [item.productId]: v }))}
+              dir={dir}
             />
           </div>
         </div>
@@ -125,11 +157,11 @@ export function RatingForm({
         disabled={!allRated || submitting}
         className="rounded-md bg-teal-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-teal-700 disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        {submitting ? "Submitting…" : "Submit ratings"}
+        {submitting ? c.submitting : c.submit}
       </button>
 
       {!allRated && (
-        <p className="text-xs text-stone-400 text-center">Please rate all items to continue</p>
+        <p className="text-xs text-stone-400 text-center">{c.rate_all}</p>
       )}
     </div>
   );
