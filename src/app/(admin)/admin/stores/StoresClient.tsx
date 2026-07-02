@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useActionState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { t, type Lang } from "@/lib/i18n/translations";
 import { DeleteButton } from "@/components/DeleteButton";
-import { useActionToast } from "@/lib/toast/useActionToast";
-import { deleteStore, toggleStoreStatus, updateSubscriptionFee } from "./actions";
+import { deleteStore, toggleStoreStatus } from "./actions";
 
 type Store = {
   id: string;
@@ -21,91 +20,17 @@ type Store = {
 type Filter = "all" | "paid" | "free";
 type StatusFilter = "all" | "active" | "suspended" | "deleted";
 
-function SubscriptionFeeModal({
-  lang,
-  currentFee,
-  onClose,
-}: {
-  lang: Lang;
-  currentFee: number;
-  onClose: () => void;
-}) {
-  const [state, formAction, pending] = useActionState(updateSubscriptionFee, undefined);
-  useActionToast(state, t(lang, "fee_saved_toast"));
-
-  const errorMsg = state?.error === "fee_zero_warning"
-    ? t(lang, "fee_zero_warning")
-    : state?.error;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div
-        className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
-        dir={lang === "ar" ? "rtl" : "ltr"}
-      >
-        <h2 className="text-base font-semibold text-stone-900">{t(lang, "fee_heading")}</h2>
-
-        <form action={formAction} className="mt-4 flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="fee" className="text-sm font-medium text-stone-700">
-              {t(lang, "fee_label")}
-            </label>
-            <input
-              id="fee"
-              name="fee"
-              type="number"
-              min="1"
-              step="1"
-              required
-              defaultValue={currentFee}
-              className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-stone-900"
-            />
-            <p className="text-xs text-stone-500">{t(lang, "fee_desc")}</p>
-          </div>
-
-          {errorMsg && (
-            <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{errorMsg}</p>
-          )}
-
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-md border border-stone-300 px-4 py-2 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-100"
-            >
-              {t(lang, "cancel_btn")}
-            </button>
-            <button
-              type="submit"
-              disabled={pending}
-              className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
-            >
-              {pending ? t(lang, "saving_btn") : t(lang, "save_btn")}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 export function StoresClient({
   stores,
   ownerEmailById,
   lang,
-  currentFeeAed,
 }: {
   stores: Store[];
   ownerEmailById: Map<string, string>;
   lang: Lang;
-  currentFeeAed: number;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [feeModalOpen, setFeeModalOpen] = useState(false);
 
   const filtered = stores.filter((s) => {
     if (filter === "paid" && s.subscription_type !== "paid") return false;
@@ -132,14 +57,6 @@ export function StoresClient({
 
   return (
     <>
-      {feeModalOpen && (
-        <SubscriptionFeeModal
-          lang={lang}
-          currentFee={currentFeeAed}
-          onClose={() => setFeeModalOpen(false)}
-        />
-      )}
-
       <div className="mt-4 flex items-center gap-3">
         <select
           value={filter}
@@ -162,14 +79,6 @@ export function StoresClient({
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
-
-        <button
-          type="button"
-          onClick={() => setFeeModalOpen(true)}
-          className="rounded-md border border-stone-300 px-3 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100"
-        >
-          {t(lang, "change_fee_btn")}: {currentFeeAed} AED
-        </button>
       </div>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm">

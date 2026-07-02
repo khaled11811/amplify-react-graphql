@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { getLang } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/translations";
 import { StoresClient } from "./StoresClient";
 
 export default async function AdminStoresPage() {
   const supabase = await createClient();
-  const adminClient = createAdminClient();
   const lang = await getLang();
 
   const { data: stores } = await supabase
@@ -21,14 +20,6 @@ export default async function AdminStoresPage() {
       : { data: [] };
 
   const ownerEmailById = new Map(owners?.map((o) => [o.id, o.email]));
-
-  const { data: feeSetting } = await adminClient
-    .from("app_settings")
-    .select("value")
-    .eq("key", "subscription_fee_aed")
-    .single();
-
-  const currentFeeAed = Number(feeSetting?.value ?? 50);
 
   return (
     <div>
@@ -55,7 +46,6 @@ export default async function AdminStoresPage() {
         }[]}
         ownerEmailById={ownerEmailById as Map<string, string>}
         lang={lang}
-        currentFeeAed={currentFeeAed}
       />
     </div>
   );
