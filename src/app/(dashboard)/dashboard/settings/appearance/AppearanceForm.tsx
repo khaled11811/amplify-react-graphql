@@ -9,8 +9,12 @@ import {
   LATIN_STORE_FONTS,
   ARABIC_STORE_FONTS,
   FONT_LABELS,
+  STORE_BUTTON_SHAPES,
+  BUTTON_SHAPE_LABELS,
+  STORE_CARD_STYLES,
   type StoreBackgroundType,
   type StoreFont,
+  type StoreButtonShape,
 } from "@/lib/theme";
 import { useActionToast } from "@/lib/toast/useActionToast";
 import { t, type Lang } from "@/lib/i18n/translations";
@@ -20,23 +24,31 @@ import { BackgroundUpload } from "./BackgroundUpload";
 export function AppearanceForm({
   storeId,
   description,
+  footerText,
   theme,
   headerColor,
   font,
   backgroundType,
   backgroundValue,
   bannerUrl,
+  buttonShape,
+  productCardStyle,
+  productsPerRow,
   storeLang,
   lang,
 }: {
   storeId: string;
   description: string | null;
+  footerText: string | null;
   theme: string;
   headerColor: string;
   font: StoreFont;
   backgroundType: StoreBackgroundType;
   backgroundValue: string | null;
   bannerUrl: string | null;
+  buttonShape: string;
+  productCardStyle: string;
+  productsPerRow: number;
   storeLang: Lang;
   lang: Lang;
 }) {
@@ -59,6 +71,13 @@ export function AppearanceForm({
   const [selectedPreset, setSelectedPreset] = useState(
     backgroundType === "preset" ? backgroundValue ?? PRESET_BACKGROUNDS[0].id : PRESET_BACKGROUNDS[0].id
   );
+  const [selectedButtonShape, setSelectedButtonShape] = useState<StoreButtonShape>(
+    (STORE_BUTTON_SHAPES as readonly string[]).includes(buttonShape) ? buttonShape as StoreButtonShape : "rounded"
+  );
+  const [selectedCardStyle, setSelectedCardStyle] = useState(
+    (STORE_CARD_STYLES as readonly string[]).includes(productCardStyle) ? productCardStyle : "grid"
+  );
+  const [selectedPerRow, setSelectedPerRow] = useState(productsPerRow ?? 3);
 
   const BG_LABELS: Record<StoreBackgroundType, string> = {
     none: t(lang, "bg_none"),
@@ -80,6 +99,22 @@ export function AppearanceForm({
           maxLength={500}
           defaultValue={description ?? ""}
           placeholder={t(lang, "store_description_placeholder")}
+          className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="footer_text" className="text-sm font-medium">
+          Footer Tagline
+        </label>
+        <p className="text-xs text-stone-500">A short line shown at the bottom of your store (slogan, copyright, etc.)</p>
+        <input
+          id="footer_text"
+          name="footer_text"
+          type="text"
+          maxLength={200}
+          defaultValue={footerText ?? ""}
+          placeholder="e.g. Trusted by thousands since 2020"
           className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
         />
       </div>
@@ -202,6 +237,91 @@ export function AppearanceForm({
           </div>
         )}
       </div>
+
+      <hr className="border-stone-200" />
+
+      {/* Button shape */}
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">Button Shape</span>
+        <p className="text-xs text-stone-500">Applies to all buttons on your store (Add to Cart, Buy Now, etc.)</p>
+        <input type="hidden" name="button_shape" value={selectedButtonShape} />
+        <div className="flex flex-wrap gap-3">
+          {STORE_BUTTON_SHAPES.map((shape) => {
+            const radiusPreview = shape === "pill" ? "9999px" : shape === "square" ? "0" : "6px";
+            return (
+              <button
+                key={shape}
+                type="button"
+                onClick={() => setSelectedButtonShape(shape)}
+                className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors ${
+                  selectedButtonShape === shape
+                    ? "border-stone-900 bg-stone-50"
+                    : "border-stone-200 hover:border-stone-300"
+                }`}
+              >
+                <span
+                  className="inline-block h-6 w-14 bg-stone-400 text-xs"
+                  style={{ borderRadius: radiusPreview }}
+                />
+                {BUTTON_SHAPE_LABELS[shape]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <hr className="border-stone-200" />
+
+      {/* Product card style */}
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">Product Card Style</span>
+        <p className="text-xs text-stone-500">How products are displayed on your store page.</p>
+        <input type="hidden" name="product_card_style" value={selectedCardStyle} />
+        <div className="flex flex-wrap gap-3">
+          {STORE_CARD_STYLES.map((style) => (
+            <button
+              key={style}
+              type="button"
+              onClick={() => setSelectedCardStyle(style)}
+              className={`rounded-md border px-3 py-2 text-sm transition-colors ${
+                selectedCardStyle === style
+                  ? "border-stone-900 bg-stone-50"
+                  : "border-stone-200 hover:border-stone-300"
+              }`}
+            >
+              {style === "grid" ? "Grid (cards)" : "List (rows)"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {selectedCardStyle === "grid" && (
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium">Products Per Row</span>
+          <p className="text-xs text-stone-500">Number of product columns on desktop.</p>
+          <input type="hidden" name="products_per_row" value={selectedPerRow} />
+          <div className="flex gap-2">
+            {[2, 3, 4].map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setSelectedPerRow(n)}
+                className={`h-9 w-12 rounded-md border text-sm font-medium transition-colors ${
+                  selectedPerRow === n
+                    ? "border-stone-900 bg-stone-50"
+                    : "border-stone-200 hover:border-stone-300"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {selectedCardStyle === "list" && (
+        <input type="hidden" name="products_per_row" value={selectedPerRow} />
+      )}
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 

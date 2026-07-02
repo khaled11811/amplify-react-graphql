@@ -27,7 +27,8 @@ export function AddToCartButton({ product, lang }: { product: Product; lang: Lan
         setTimeout(() => setAdded(false), 1200);
       }}
       disabled={product.stock <= 0}
-      className="rounded-md bg-[var(--store-primary)] px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)] disabled:opacity-50"
+      className="bg-[var(--store-primary)] px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)] disabled:opacity-50"
+      style={{ borderRadius: "var(--store-btn-radius, 0.375rem)" }}
     >
       {product.stock <= 0
         ? t(lang, "out_of_stock_btn")

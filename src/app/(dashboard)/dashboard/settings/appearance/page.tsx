@@ -36,12 +36,16 @@ export default async function AppearanceSettingsPage() {
       <AppearanceForm
         storeId={store.id}
         description={store.description}
+        footerText={store.footer_text ?? null}
         theme={store.theme}
         headerColor={store.header_color}
         font={store.font}
         backgroundType={store.background_type}
         backgroundValue={store.background_value}
         bannerUrl={store.banner_url}
+        buttonShape={store.button_shape ?? "rounded"}
+        productCardStyle={store.product_card_style ?? "grid"}
+        productsPerRow={store.products_per_row ?? 3}
         storeLang={(store.store_language === "ar" ? "ar" : "en") as Lang}
         lang={lang}
       />

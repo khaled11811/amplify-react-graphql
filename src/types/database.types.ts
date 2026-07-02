@@ -37,6 +37,8 @@ export type ContactInfo = {
   whatsapp_number?: string;
   instagram?: string;
   facebook?: string;
+  tiktok?: string;
+  x_twitter?: string;
   business_email?: string;
   website?: string;
 };
@@ -78,6 +80,10 @@ export type Store = {
   trade_license_doc_url: string | null;
   tax_registration_number: string | null;
   vat_certificate_url: string | null;
+  footer_text: string | null;
+  products_per_row: number;
+  button_shape: string;
+  product_card_style: string;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

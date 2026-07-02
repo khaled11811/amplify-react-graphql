@@ -22,12 +22,16 @@ export async function updateStoreAppearance(
 
   const parsed = storeAppearanceSchema.safeParse({
     description: formData.get("description") || undefined,
+    footer_text: formData.get("footer_text") || undefined,
     theme: formData.get("theme"),
     header_color: formData.get("header_color") || undefined,
     font: formData.get("font"),
     background_type: formData.get("background_type"),
     background_color: formData.get("background_color") || undefined,
     background_preset: formData.get("background_preset") || undefined,
+    button_shape: formData.get("button_shape") || undefined,
+    product_card_style: formData.get("product_card_style") || undefined,
+    products_per_row: formData.get("products_per_row") || undefined,
   });
 
   if (!parsed.success) {
@@ -39,11 +43,15 @@ export async function updateStoreAppearance(
     .from("stores")
     .update({
       description: parsed.data.description ?? null,
+      footer_text: parsed.data.footer_text,
       theme: parsed.data.theme,
       header_color: parsed.data.header_color,
       font: parsed.data.font,
       background_type: parsed.data.background_type,
       background_value: parsed.data.background_value,
+      button_shape: parsed.data.button_shape,
+      product_card_style: parsed.data.product_card_style,
+      products_per_row: parsed.data.products_per_row,
     })
     .eq("id", profile.store_id);
 
@@ -71,6 +79,8 @@ export async function updateGeneralSettings(
     whatsapp_number: formData.get("whatsapp_number") || undefined,
     instagram: formData.get("instagram") || undefined,
     facebook: formData.get("facebook") || undefined,
+    tiktok: formData.get("tiktok") || undefined,
+    x_twitter: formData.get("x_twitter") || undefined,
     business_email: formData.get("business_email") || undefined,
     website: formData.get("website") || undefined,
     newPassword: formData.get("newPassword") || undefined,

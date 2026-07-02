@@ -67,7 +67,7 @@ export function InquiryModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-3 w-full rounded-md bg-[var(--store-primary)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)]"
+        className="mt-3 w-full bg-[var(--store-primary)] [border-radius:var(--store-btn-radius,0.375rem)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)]"
       >
         {t(lang, "enquire_btn")}
       </button>
@@ -99,7 +99,7 @@ export function InquiryModal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="mt-4 rounded-md bg-[var(--store-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--store-primary-hover)]"
+                  className="mt-4 bg-[var(--store-primary)] [border-radius:var(--store-btn-radius,0.375rem)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--store-primary-hover)]"
                 >
                   {t(lang, "close_btn")}
                 </button>
@@ -155,7 +155,7 @@ export function InquiryModal({
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="rounded-md bg-[var(--store-primary)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)] disabled:opacity-50"
+                    className="bg-[var(--store-primary)] [border-radius:var(--store-btn-radius,0.375rem)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--store-primary-hover)] disabled:opacity-50"
                   >
                     {submitting ? t(lang, "sending_btn") : t(lang, "send_enquiry_btn")}
                   </button>

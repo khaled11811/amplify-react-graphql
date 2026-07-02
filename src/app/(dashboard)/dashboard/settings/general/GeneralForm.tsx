@@ -154,6 +154,34 @@ export function GeneralForm({
 
       <hr className="border-stone-200" />
 
+      <div className="flex gap-4">
+        <div className="flex flex-1 flex-col gap-1">
+          <label htmlFor="tiktok" className="text-sm font-medium">TikTok</label>
+          <input
+            id="tiktok"
+            name="tiktok"
+            type="text"
+            placeholder="@yourhandle"
+            defaultValue={contactInfo.tiktok ?? ""}
+            className="w-full min-w-0 rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+          />
+        </div>
+
+        <div className="flex flex-1 flex-col gap-1">
+          <label htmlFor="x_twitter" className="text-sm font-medium">X (Twitter)</label>
+          <input
+            id="x_twitter"
+            name="x_twitter"
+            type="text"
+            placeholder="@yourhandle"
+            defaultValue={contactInfo.x_twitter ?? ""}
+            className="w-full min-w-0 rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+          />
+        </div>
+      </div>
+
+      <hr className="border-stone-200" />
+
       <div className="flex flex-col gap-1">
         <label htmlFor="website" className="text-sm font-medium">
           {t(lang, "website_label")}

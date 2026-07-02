@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DEFAULT_THEME_COLOR, STORE_BACKGROUND_TYPES, STORE_FONTS, PRESET_BACKGROUNDS } from "@/lib/theme";
+import { DEFAULT_THEME_COLOR, STORE_BACKGROUND_TYPES, STORE_FONTS, PRESET_BACKGROUNDS, STORE_BUTTON_SHAPES, STORE_CARD_STYLES } from "@/lib/theme";
 
 const STORE_LANGUAGE_VALUES = ["en", "ar"] as const;
 
@@ -64,12 +64,16 @@ const hexColorSchema = z.string().trim().regex(/^#[0-9a-fA-F]{6}$/, {
 export const storeAppearanceSchema = z
   .object({
     description: z.string().trim().max(500).optional(),
+    footer_text: z.string().trim().max(200).optional(),
     theme: hexColorSchema.optional(),
     header_color: hexColorSchema.optional(),
     font: z.enum(STORE_FONTS),
     background_type: z.enum(STORE_BACKGROUND_TYPES),
     background_color: z.string().trim().optional(),
     background_preset: z.enum(presetBackgroundIds).optional(),
+    button_shape: z.enum(STORE_BUTTON_SHAPES).default("rounded"),
+    product_card_style: z.enum(STORE_CARD_STYLES).default("grid"),
+    products_per_row: z.coerce.number().int().min(2).max(4).default(3),
   })
   .transform((data) => {
     let background_value: string | null = null;
@@ -81,11 +85,15 @@ export const storeAppearanceSchema = z
 
     return {
       description: data.description,
+      footer_text: data.footer_text || null,
       theme: data.theme || DEFAULT_THEME_COLOR,
       header_color: data.header_color || "#ffffff",
       font: data.font,
       background_type: data.background_type,
       background_value,
+      button_shape: data.button_shape,
+      product_card_style: data.product_card_style,
+      products_per_row: data.products_per_row,
     };
   });
 
@@ -102,6 +110,8 @@ export const contactInfoSchema = z.object({
   whatsapp_number: z.string().trim().max(30).optional(),
   instagram: z.string().trim().max(100).optional(),
   facebook: z.string().trim().max(100).optional(),
+  tiktok: z.string().trim().max(100).optional(),
+  x_twitter: z.string().trim().max(100).optional(),
   business_email: z.union([z.email(), z.literal("")]).optional(),
   website: z.string().trim().max(200).optional(),
 });

@@ -4,7 +4,7 @@ import { Playfair_Display, Poppins, Tajawal, Cairo, Amiri } from "next/font/goog
 import { notFound } from "next/navigation";
 import { getStoreBySlug } from "@/lib/data/storefront";
 import { CartProvider } from "@/lib/cart/CartContext";
-import { themeStyle, backgroundStyle, getContrastTextColor, DEFAULT_THEME_COLOR } from "@/lib/theme";
+import { themeStyle, backgroundStyle, getContrastTextColor, DEFAULT_THEME_COLOR, buttonShapeStyle } from "@/lib/theme";
 import { t, type Lang } from "@/lib/i18n/translations";
 import { CartLink } from "./CartLink";
 import { StoreContact } from "./StoreContact";
@@ -55,6 +55,7 @@ export default async function StoreLayout({
   const style = {
     ...themeStyle(store.theme || DEFAULT_THEME_COLOR),
     ...backgroundStyle(store),
+    ...buttonShapeStyle(store.button_shape ?? "rounded"),
   };
 
   const fontClassName =
@@ -138,7 +139,10 @@ export default async function StoreLayout({
                 )}
               </div>
             )}
-            <p className="mt-4 text-center text-xs text-stone-400">{t(lang, "powered_by_text")}</p>
+            {store.footer_text && (
+              <p className="mt-3 text-center text-xs text-stone-500">{store.footer_text}</p>
+            )}
+            <p className="mt-2 text-center text-xs text-stone-400">{t(lang, "powered_by_text")}</p>
           </div>
         </footer>
       </div>

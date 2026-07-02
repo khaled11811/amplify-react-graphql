@@ -68,6 +68,29 @@ export function isStoreFont(value: string): value is StoreFont {
   return (STORE_FONTS as readonly string[]).includes(value);
 }
 
+export const STORE_BUTTON_SHAPES = ["rounded", "pill", "square"] as const;
+export type StoreButtonShape = (typeof STORE_BUTTON_SHAPES)[number];
+
+export const BUTTON_SHAPE_LABELS: Record<StoreButtonShape, string> = {
+  rounded: "Rounded",
+  pill: "Pill",
+  square: "Square",
+};
+
+const BUTTON_SHAPE_RADIUS: Record<StoreButtonShape, string> = {
+  rounded: "0.375rem",
+  pill: "9999px",
+  square: "0",
+};
+
+export function buttonShapeStyle(shape: string): React.CSSProperties {
+  const radius = BUTTON_SHAPE_RADIUS[shape as StoreButtonShape] ?? BUTTON_SHAPE_RADIUS.rounded;
+  return { "--store-btn-radius": radius } as React.CSSProperties;
+}
+
+export const STORE_CARD_STYLES = ["grid", "list"] as const;
+export type StoreCardStyle = (typeof STORE_CARD_STYLES)[number];
+
 export function backgroundStyle(store: {
   background_type: StoreBackgroundType;
   background_value: string | null;

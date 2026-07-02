@@ -89,49 +89,100 @@ export default async function StorePage({
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="flex flex-col rounded-xl border border-stone-200 bg-white p-2 shadow-sm sm:p-4"
-          >
-            <Link href={`/store/${slug}/products/${product.slug}`} className="group">
-              <div className="relative aspect-square w-full overflow-hidden rounded-md bg-stone-100">
-                {product.images[0] ? (
-                  <Image
-                    src={product.images[0].image_url}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-xs text-stone-400">
-                    {t(lang, "no_image_placeholder")}
-                  </div>
+      {store.product_card_style === "list" ? (
+        <div className="mt-6 flex flex-col gap-2">
+          {products.map((product) => (
+            <div key={product.id} className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white p-3 shadow-sm">
+              <Link href={`/store/${slug}/products/${product.slug}`} className="group shrink-0">
+                <div className="relative h-20 w-20 overflow-hidden rounded-md bg-stone-100">
+                  {product.images[0] ? (
+                    <Image
+                      src={product.images[0].image_url}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-xs text-stone-400">
+                      {t(lang, "no_image_placeholder")}
+                    </div>
+                  )}
+                </div>
+              </Link>
+              <div className="min-w-0 flex-1">
+                <Link href={`/store/${slug}/products/${product.slug}`}>
+                  <h2 className="line-clamp-1 text-sm font-medium hover:underline">{product.name}</h2>
+                </Link>
+                <StarDisplay avgRating={product.avg_rating} ratingCount={product.rating_count} size="xs" />
+                {product.description && (
+                  <p className="mt-0.5 line-clamp-2 text-xs text-stone-500">{product.description}</p>
                 )}
               </div>
-              <h2 className="mt-2 line-clamp-2 text-xs font-medium hover:underline sm:text-base">{product.name}</h2>
-              <StarDisplay avgRating={product.avg_rating} ratingCount={product.rating_count} size="xs" />
-            </Link>
-            {product.description && (
-              <p className="mt-1 line-clamp-2 hidden text-sm text-stone-600 sm:block">
-                {product.description}
-              </p>
-            )}
-            <div className="mt-auto flex flex-col gap-1 pt-2 sm:flex-row sm:items-center sm:justify-between sm:pt-3">
-              <span className="text-xs font-semibold sm:text-base">
-                {formatPrice(product.price, store.currency)}
-              </span>
-              {store.store_type === "paid_shop" && <AddToCartButton product={product} lang={lang} />}
+              <div className="flex shrink-0 flex-col items-end gap-2">
+                <span className="text-sm font-semibold">{formatPrice(product.price, store.currency)}</span>
+                {store.store_type === "paid_shop" && <AddToCartButton product={product} lang={lang} />}
+              </div>
             </div>
-          </div>
-        ))}
-        {!products.length && (
-          <p className="text-stone-500">
-            {q ? `${t(lang, "no_products_matching")} "${q}".` : t(lang, "no_products_available")}
-          </p>
-        )}
-      </div>
+          ))}
+          {!products.length && (
+            <p className="text-stone-500">
+              {q ? `${t(lang, "no_products_matching")} "${q}".` : t(lang, "no_products_available")}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div
+          className={`mt-6 grid grid-cols-2 gap-2 sm:gap-4 ${
+            store.products_per_row === 2
+              ? "sm:grid-cols-2"
+              : store.products_per_row === 4
+                ? "sm:grid-cols-3 lg:grid-cols-4"
+                : "sm:grid-cols-3"
+          }`}
+        >
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="flex flex-col rounded-xl border border-stone-200 bg-white p-2 shadow-sm sm:p-4"
+            >
+              <Link href={`/store/${slug}/products/${product.slug}`} className="group">
+                <div className="relative aspect-square w-full overflow-hidden rounded-md bg-stone-100">
+                  {product.images[0] ? (
+                    <Image
+                      src={product.images[0].image_url}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-xs text-stone-400">
+                      {t(lang, "no_image_placeholder")}
+                    </div>
+                  )}
+                </div>
+                <h2 className="mt-2 line-clamp-2 text-xs font-medium hover:underline sm:text-base">{product.name}</h2>
+                <StarDisplay avgRating={product.avg_rating} ratingCount={product.rating_count} size="xs" />
+              </Link>
+              {product.description && (
+                <p className="mt-1 line-clamp-2 hidden text-sm text-stone-600 sm:block">
+                  {product.description}
+                </p>
+              )}
+              <div className="mt-auto flex flex-col gap-1 pt-2 sm:flex-row sm:items-center sm:justify-between sm:pt-3">
+                <span className="text-xs font-semibold sm:text-base">
+                  {formatPrice(product.price, store.currency)}
+                </span>
+                {store.store_type === "paid_shop" && <AddToCartButton product={product} lang={lang} />}
+              </div>
+            </div>
+          ))}
+          {!products.length && (
+            <p className="text-stone-500">
+              {q ? `${t(lang, "no_products_matching")} "${q}".` : t(lang, "no_products_available")}
+            </p>
+          )}
+        </div>
+      )}
 
       {totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-1">
