@@ -288,11 +288,22 @@ export function SignupFlow({ lang }: { lang: Lang }) {
                       onChange={() => setInfo((p) => ({ ...p, storeType: type }))}
                       className="mt-0.5 accent-teal-600"
                     />
-                    <div>
-                      <div className="text-sm font-medium">
-                        {type === "paid_shop" ? t(lang, "purchase_shop_name") : t(lang, "display_shop_name")}
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium">
+                          {type === "paid_shop" ? t(lang, "purchase_shop_name") : t(lang, "display_shop_name")}
+                        </span>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          type === "paid_shop"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-teal-100 text-teal-700"
+                        }`}>
+                          {lang === "ar"
+                            ? (type === "paid_shop" ? "مدفوع" : "مجاني")
+                            : (type === "paid_shop" ? "Paid" : "Free")}
+                        </span>
                       </div>
-                      <div className="text-xs text-stone-500">
+                      <div className="mt-0.5 text-xs text-stone-500">
                         {type === "paid_shop" ? t(lang, "purchase_shop_desc") : t(lang, "display_shop_desc")}
                       </div>
                     </div>
