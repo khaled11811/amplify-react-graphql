@@ -111,7 +111,7 @@ export default async function StoreLayout({
         <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">{children}</main>
         <footer className="border-t border-stone-200 bg-white/80 px-4 py-6 sm:px-6">
           <div className="mx-auto max-w-7xl">
-            <StoreContact contactInfo={store.contact_info ?? {}} />
+            <StoreContact contactInfo={store.contact_info ?? {}} lang={lang} />
             {(store.trade_license_number || store.tax_registration_number) && (
               <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-xs text-stone-400">
                 {store.trade_license_number && (

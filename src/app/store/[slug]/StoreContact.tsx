@@ -1,4 +1,5 @@
 import type { ContactInfo } from "@/types/database.types";
+import { t, type Lang } from "@/lib/i18n/translations";
 
 function digitsOnly(value: string) {
   return value.replace(/[^\d+]/g, "");
@@ -70,7 +71,7 @@ function WebsiteIcon() {
   );
 }
 
-export function StoreContact({ contactInfo }: { contactInfo: ContactInfo }) {
+export function StoreContact({ contactInfo, lang }: { contactInfo: ContactInfo; lang: Lang }) {
   const links: { label: string; href: string; icon: React.ReactNode }[] = [];
 
   if (contactInfo.phone_number) {
@@ -140,7 +141,7 @@ export function StoreContact({ contactInfo }: { contactInfo: ContactInfo }) {
 
   return (
     <div>
-      <h2 className="text-sm font-medium text-stone-900">Contact us</h2>
+      <h2 className="text-sm font-medium text-stone-900">{t(lang, "contact_us_heading")}</h2>
       <div className="mt-3 flex flex-wrap gap-2">
         {links.map((link) => (
           <a
