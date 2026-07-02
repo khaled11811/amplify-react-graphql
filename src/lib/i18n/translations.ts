@@ -399,6 +399,27 @@ const en = {
   fee_saved_toast: "Subscription fee updated.",
   store_url_label: "Store URL",
 
+  // Appearance - new customization options
+  footer_tagline_label: "Footer Tagline",
+  footer_tagline_desc: "A short line shown at the bottom of your store (slogan, copyright, etc.)",
+  footer_tagline_placeholder: "e.g. Trusted by thousands since 2020",
+  button_shape_label: "Button Shape",
+  button_shape_desc: "Applies to all buttons on your store (Add to Cart, Buy Now, etc.)",
+  btn_shape_rounded: "Rounded",
+  btn_shape_pill: "Pill",
+  btn_shape_square: "Square",
+  card_style_label: "Product Card Style",
+  card_style_desc: "How products are displayed on your store page.",
+  card_style_grid: "Grid (cards)",
+  card_style_list: "List (rows)",
+  products_per_row_label: "Products Per Row",
+  products_per_row_desc: "Number of product columns on desktop.",
+
+  // General - social links
+  tiktok_label: "TikTok",
+  x_twitter_label: "X (Twitter)",
+  social_handle_placeholder: "@yourhandle",
+
   // Stripe Connect onboarding
   connect_intro: "Connect your bank account with Stripe to receive payments from your customers directly — no manual payout requests needed.",
   connect_country_label: "Country",
@@ -794,6 +815,27 @@ const ar: typeof en = {
   fee_zero_warning: "يجب أن تكون الرسوم أكبر من 0 درهم.",
   fee_saved_toast: "تم تحديث رسوم الاشتراك.",
   store_url_label: "رابط المتجر",
+
+  // Appearance - new customization options
+  footer_tagline_label: "شعار التذييل",
+  footer_tagline_desc: "سطر قصير يظهر في أسفل متجرك (شعار، حقوق ملكية، إلخ.)",
+  footer_tagline_placeholder: "مثال: موثوق به من آلاف العملاء منذ 2020",
+  button_shape_label: "شكل الأزرار",
+  button_shape_desc: "يُطبَّق على جميع أزرار متجرك (أضف إلى السلة، اشتر الآن، إلخ.)",
+  btn_shape_rounded: "دائري جزئي",
+  btn_shape_pill: "بيضاوي",
+  btn_shape_square: "مربع",
+  card_style_label: "أسلوب عرض المنتجات",
+  card_style_desc: "كيفية عرض المنتجات في صفحة متجرك.",
+  card_style_grid: "شبكة (بطاقات)",
+  card_style_list: "قائمة (صفوف)",
+  products_per_row_label: "عدد المنتجات في الصف",
+  products_per_row_desc: "عدد أعمدة المنتجات على شاشات الحاسوب.",
+
+  // General - social links
+  tiktok_label: "تيك توك",
+  x_twitter_label: "إكس (تويتر)",
+  social_handle_placeholder: "@معرّفك",
 
   // Stripe Connect onboarding
   connect_intro: "اربط حسابك البنكي عبر Stripe لاستقبال المدفوعات من عملائك مباشرة — دون الحاجة لطلب استرداد يدوي.",

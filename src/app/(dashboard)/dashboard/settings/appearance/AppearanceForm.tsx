@@ -10,7 +10,6 @@ import {
   ARABIC_STORE_FONTS,
   FONT_LABELS,
   STORE_BUTTON_SHAPES,
-  BUTTON_SHAPE_LABELS,
   STORE_CARD_STYLES,
   type StoreBackgroundType,
   type StoreFont,
@@ -105,16 +104,16 @@ export function AppearanceForm({
 
       <div className="flex flex-col gap-2">
         <label htmlFor="footer_text" className="text-sm font-medium">
-          Footer Tagline
+          {t(lang, "footer_tagline_label")}
         </label>
-        <p className="text-xs text-stone-500">A short line shown at the bottom of your store (slogan, copyright, etc.)</p>
+        <p className="text-xs text-stone-500">{t(lang, "footer_tagline_desc")}</p>
         <input
           id="footer_text"
           name="footer_text"
           type="text"
           maxLength={200}
           defaultValue={footerText ?? ""}
-          placeholder="e.g. Trusted by thousands since 2020"
+          placeholder={t(lang, "footer_tagline_placeholder")}
           className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
         />
       </div>
@@ -242,12 +241,17 @@ export function AppearanceForm({
 
       {/* Button shape */}
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Button Shape</span>
-        <p className="text-xs text-stone-500">Applies to all buttons on your store (Add to Cart, Buy Now, etc.)</p>
+        <span className="text-sm font-medium">{t(lang, "button_shape_label")}</span>
+        <p className="text-xs text-stone-500">{t(lang, "button_shape_desc")}</p>
         <input type="hidden" name="button_shape" value={selectedButtonShape} />
         <div className="flex flex-wrap gap-3">
           {STORE_BUTTON_SHAPES.map((shape) => {
             const radiusPreview = shape === "pill" ? "9999px" : shape === "square" ? "0" : "6px";
+            const shapeLabel = shape === "rounded"
+              ? t(lang, "btn_shape_rounded")
+              : shape === "pill"
+                ? t(lang, "btn_shape_pill")
+                : t(lang, "btn_shape_square");
             return (
               <button
                 key={shape}
@@ -263,7 +267,7 @@ export function AppearanceForm({
                   className="inline-block h-6 w-14 bg-stone-400 text-xs"
                   style={{ borderRadius: radiusPreview }}
                 />
-                {BUTTON_SHAPE_LABELS[shape]}
+                {shapeLabel}
               </button>
             );
           })}
@@ -274,8 +278,8 @@ export function AppearanceForm({
 
       {/* Product card style */}
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Product Card Style</span>
-        <p className="text-xs text-stone-500">How products are displayed on your store page.</p>
+        <span className="text-sm font-medium">{t(lang, "card_style_label")}</span>
+        <p className="text-xs text-stone-500">{t(lang, "card_style_desc")}</p>
         <input type="hidden" name="product_card_style" value={selectedCardStyle} />
         <div className="flex flex-wrap gap-3">
           {STORE_CARD_STYLES.map((style) => (
@@ -289,7 +293,7 @@ export function AppearanceForm({
                   : "border-stone-200 hover:border-stone-300"
               }`}
             >
-              {style === "grid" ? "Grid (cards)" : "List (rows)"}
+              {style === "grid" ? t(lang, "card_style_grid") : t(lang, "card_style_list")}
             </button>
           ))}
         </div>
@@ -297,8 +301,8 @@ export function AppearanceForm({
 
       {selectedCardStyle === "grid" && (
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium">Products Per Row</span>
-          <p className="text-xs text-stone-500">Number of product columns on desktop.</p>
+          <span className="text-sm font-medium">{t(lang, "products_per_row_label")}</span>
+          <p className="text-xs text-stone-500">{t(lang, "products_per_row_desc")}</p>
           <input type="hidden" name="products_per_row" value={selectedPerRow} />
           <div className="flex gap-2">
             {[2, 3, 4].map((n) => (
