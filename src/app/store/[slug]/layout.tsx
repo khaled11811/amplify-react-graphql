@@ -111,6 +111,20 @@ export default async function StoreLayout({
         <footer className="border-t border-stone-200 bg-white/80 px-4 py-6 sm:px-6">
           <div className="mx-auto max-w-7xl">
             <StoreContact contactInfo={store.contact_info ?? {}} />
+            {(store.trade_license_number || store.tax_registration_number) && (
+              <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-xs text-stone-400">
+                {store.trade_license_number && (
+                  <span>
+                    {lang === "ar" ? "رقم الرخصة التجارية" : "TL/CR No."}: {store.trade_license_number}
+                  </span>
+                )}
+                {store.tax_registration_number && (
+                  <span>
+                    {lang === "ar" ? "رقم التسجيل الضريبي" : "Tax Reg. No."}: {store.tax_registration_number}
+                  </span>
+                )}
+              </div>
+            )}
             <p className="mt-4 text-center text-xs text-stone-400">{t(lang, "powered_by_text")}</p>
           </div>
         </footer>

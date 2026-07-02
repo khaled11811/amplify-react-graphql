@@ -124,6 +124,40 @@ export async function updateGeneralSettings(
   return { success: true };
 }
 
+export async function updateLicenseInfo(
+  _state: SettingsActionState,
+  formData: FormData
+): Promise<SettingsActionState> {
+  const profile = await getCurrentProfile();
+  if (profile?.role !== "store_manager" || !profile.store_id) {
+    return { error: "Not authorized." };
+  }
+
+  const tlNumber = (formData.get("trade_license_number") as string | null)?.trim() || null;
+  const tlExpiry = (formData.get("trade_license_expiry") as string | null)?.trim() || null;
+  const taxNumber = (formData.get("tax_registration_number") as string | null)?.trim() || null;
+
+  if (!tlNumber) return { error: "TL/CR number is required." };
+  if (!tlExpiry) return { error: "TL/CR expiry date is required." };
+  if (!taxNumber) return { error: "Tax registration number is required." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("stores")
+    .update({
+      trade_license_number: tlNumber,
+      trade_license_expiry: tlExpiry,
+      tax_registration_number: taxNumber,
+    })
+    .eq("id", profile.store_id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings/general");
+  revalidatePath(`/store`, "layout");
+  return { success: true };
+}
+
 export async function updateBillingInfo(
   _state: SettingsActionState,
   formData: FormData

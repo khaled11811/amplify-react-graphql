@@ -73,6 +73,11 @@ export type Store = {
   stripe_account_id: string | null;
   stripe_charges_enabled: boolean;
   stripe_onboarding_status: StripeOnboardingStatus;
+  trade_license_number: string | null;
+  trade_license_expiry: string | null;
+  trade_license_doc_url: string | null;
+  tax_registration_number: string | null;
+  vat_certificate_url: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
