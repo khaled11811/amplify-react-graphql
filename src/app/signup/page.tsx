@@ -1,9 +1,19 @@
 import Image from "next/image";
+import { createAdminClient } from "@/lib/supabase/server";
 import { getLang } from "@/lib/i18n/server";
 import { SignupFlow } from "./SignupFlow";
 
 export default async function SignupPage() {
   const lang = await getLang();
+  const adminClient = createAdminClient();
+
+  const { data: setting } = await adminClient
+    .from("app_settings")
+    .select("value")
+    .eq("key", "allow_purchase_stores")
+    .single();
+
+  const allowPurchaseStores = setting?.value !== "false";
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center p-4">
@@ -16,7 +26,7 @@ export default async function SignupPage() {
       />
       <div className="absolute inset-0 bg-white/40" />
       <div className="relative z-10 flex w-full flex-col items-center py-6 sm:py-8">
-        <SignupFlow lang={lang} />
+        <SignupFlow lang={lang} allowPurchaseStores={allowPurchaseStores} />
       </div>
     </div>
   );

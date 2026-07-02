@@ -20,6 +20,7 @@ export default async function AdminLayout({
     { href: "/admin", label: t(lang, "nav_overview") },
     { href: "/admin/stores", label: t(lang, "nav_stores") },
     { href: "/admin/payouts", label: t(lang, "nav_payouts") },
+    { href: "/admin/settings", label: lang === "ar" ? "الإعدادات" : "Settings" },
   ];
 
   return (

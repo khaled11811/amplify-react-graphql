@@ -67,13 +67,13 @@ function AvailabilityIndicator({ status }: { status: "idle" | "checking" | "avai
   return <span className="text-xs text-red-600 font-medium">✗</span>;
 }
 
-export function SignupFlow({ lang }: { lang: Lang }) {
+export function SignupFlow({ lang, allowPurchaseStores }: { lang: Lang; allowPurchaseStores: boolean }) {
   const dir = lang === "ar" ? "rtl" : "ltr";
   const [step, setStep] = useState<Step>(1);
   const [info, setInfo] = useState<StoreInfo>({
     storeName: "",
     storeSlug: "",
-    storeType: "paid_shop",
+    storeType: allowPurchaseStores ? "paid_shop" : "display_shop",
     managerName: "",
     email: "",
     password: "",
@@ -278,7 +278,7 @@ export function SignupFlow({ lang }: { lang: Lang }) {
             <div className="flex flex-col gap-1">
               <label className={labelClass}>{t(lang, "store_type_label")}</label>
               <div className="flex flex-col gap-2">
-                {(["paid_shop", "display_shop"] as const).map((type) => (
+                {(["paid_shop", "display_shop"] as const).filter((type) => type !== "paid_shop" || allowPurchaseStores).map((type) => (
                   <label key={type} className="flex cursor-pointer items-start gap-2 rounded-md border border-stone-200 p-3 hover:border-teal-500 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
                     <input
                       type="radio"
@@ -293,15 +293,17 @@ export function SignupFlow({ lang }: { lang: Lang }) {
                         <span className="text-sm font-medium">
                           {type === "paid_shop" ? t(lang, "purchase_shop_name") : t(lang, "display_shop_name")}
                         </span>
-                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                          type === "paid_shop"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-teal-100 text-teal-700"
-                        }`}>
-                          {lang === "ar"
-                            ? (type === "paid_shop" ? "مدفوع" : "مجاني")
-                            : (type === "paid_shop" ? "Paid" : "Free")}
-                        </span>
+                        {allowPurchaseStores && (
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            type === "paid_shop"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-teal-100 text-teal-700"
+                          }`}>
+                            {lang === "ar"
+                              ? (type === "paid_shop" ? "مدفوع" : "مجاني")
+                              : (type === "paid_shop" ? "Paid" : "Free")}
+                          </span>
+                        )}
                       </div>
                       <div className="mt-0.5 text-xs text-stone-500">
                         {type === "paid_shop" ? t(lang, "purchase_shop_desc") : t(lang, "display_shop_desc")}
