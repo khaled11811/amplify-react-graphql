@@ -123,7 +123,7 @@ export async function provisionSignup(
       name: pending.store_name,
       slug: pending.store_slug,
       store_type: pending.store_type as "paid_shop" | "display_shop",
-      subscription_type: "paid",
+      subscription_type: pending.store_type === "paid_shop" ? "paid" : "free",
     })
     .select()
     .single();

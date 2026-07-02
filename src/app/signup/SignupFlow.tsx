@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { t, type Lang } from "@/lib/i18n/translations";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { TermsContent } from "./TermsContent";
@@ -30,7 +31,7 @@ function Stepper({ step, lang }: { step: Step; lang: Lang }) {
   const steps = [
     t(lang, "step_store_info"),
     t(lang, "step_terms"),
-    t(lang, "step_payment"),
+    lang === "ar" ? "تأكيد" : "Confirm",
   ] as const;
 
   return (
@@ -66,7 +67,7 @@ function AvailabilityIndicator({ status }: { status: "idle" | "checking" | "avai
   return <span className="text-xs text-red-600 font-medium">✗</span>;
 }
 
-export function SignupFlow({ lang, feeAed }: { lang: Lang; feeAed: number }) {
+export function SignupFlow({ lang }: { lang: Lang }) {
   const dir = lang === "ar" ? "rtl" : "ltr";
   const [step, setStep] = useState<Step>(1);
   const [info, setInfo] = useState<StoreInfo>({
@@ -82,8 +83,9 @@ export function SignupFlow({ lang, feeAed }: { lang: Lang; feeAed: number }) {
   const [emailStatus, setEmailStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [payError, setPayError] = useState<string | null>(null);
-  const [paying, setPaying] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const emailTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const slugTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -161,11 +163,11 @@ export function SignupFlow({ lang, feeAed }: { lang: Lang; feeAed: number }) {
     }
   }
 
-  async function handlePay() {
-    setPaying(true);
-    setPayError(null);
+  async function handleCreate() {
+    setCreating(true);
+    setCreateError(null);
     try {
-      const res = await fetch("/api/payments/signup-checkout", {
+      const res = await fetch("/api/signup/provision", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -179,21 +181,50 @@ export function SignupFlow({ lang, feeAed }: { lang: Lang; feeAed: number }) {
         }),
       });
       const data = await res.json();
-      if (!res.ok || !data.url) {
-        setPayError(data.error ?? (lang === "ar" ? "حدث خطأ. يرجى المحاولة مرة أخرى." : "Something went wrong. Please try again."));
-        setPaying(false);
+      if (!res.ok) {
+        setCreateError(data.error ?? (lang === "ar" ? "حدث خطأ. يرجى المحاولة مرة أخرى." : "Something went wrong. Please try again."));
+        setCreating(false);
         return;
       }
-      window.location.href = data.url;
+      setSuccess(true);
     } catch {
-      setPayError(lang === "ar" ? "حدث خطأ. يرجى المحاولة مرة أخرى." : "Something went wrong. Please try again.");
-      setPaying(false);
+      setCreateError(lang === "ar" ? "حدث خطأ. يرجى المحاولة مرة أخرى." : "Something went wrong. Please try again.");
+      setCreating(false);
     }
   }
 
   const inputClass = "rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-teal-600 w-full";
   const labelClass = "text-sm font-medium text-stone-700";
   const errorClass = "text-xs text-red-600";
+
+  // Success screen
+  if (success) {
+    return (
+      <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white/95 p-5 shadow-lg backdrop-blur-sm sm:p-8" dir={dir}>
+        <div className="flex flex-col items-center text-center py-4">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-teal-100">
+            <svg className="h-7 w-7 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-stone-900">{t(lang, "signup_success_heading")}</h1>
+          <p className="mt-3 text-stone-600">{t(lang, "signup_success_msg")}</p>
+          {info.storeName && (
+            <p className="mt-2 text-sm text-stone-500">
+              {lang === "ar" ? `متجرك: ${info.storeName}` : `Store: ${info.storeName}`}
+              <span className="block text-xs text-stone-400">/store/{info.storeSlug}</span>
+            </p>
+          )}
+          <Link
+            href="/login"
+            className="mt-6 inline-block rounded-md bg-teal-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-teal-700"
+          >
+            {t(lang, "go_to_login_btn")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white/95 p-5 shadow-lg backdrop-blur-sm sm:p-8" dir={dir}>
@@ -378,46 +409,62 @@ export function SignupFlow({ lang, feeAed }: { lang: Lang; feeAed: number }) {
           </div>
         )}
 
-        {/* Step 3: Payment */}
+        {/* Step 3: Confirm & Create */}
         {step === 3 && (
           <div className="flex flex-col gap-4">
-            <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
-              <h3 className="text-sm font-semibold text-stone-900">{t(lang, "payment_heading")}</h3>
-              <p className="mt-1 text-xs text-stone-500">{t(lang, "payment_sub")}</p>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-sm text-stone-700">
-                  {info.storeName}
-                </span>
-                <span className="text-lg font-bold text-stone-900">{feeAed} AED</span>
+            <div className="rounded-lg border border-stone-200 bg-stone-50 p-4 flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-stone-900">
+                {lang === "ar" ? "ملخص المتجر" : "Store summary"}
+              </h3>
+              <div className="flex flex-col gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-stone-500">{t(lang, "store_name")}</span>
+                  <span className="font-medium text-stone-900">{info.storeName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">{lang === "ar" ? "الرابط" : "URL"}</span>
+                  <span className="font-medium text-stone-900 dir-ltr" dir="ltr">/store/{info.storeSlug}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">{t(lang, "store_type_label")}</span>
+                  <span className="font-medium text-stone-900">
+                    {info.storeType === "paid_shop" ? t(lang, "purchase_shop_name") : t(lang, "display_shop_name")}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">{t(lang, "email_label")}</span>
+                  <span className="font-medium text-stone-900 dir-ltr" dir="ltr">{info.email}</span>
+                </div>
+                <hr className="border-stone-200" />
+                <div className="flex justify-between">
+                  <span className="text-stone-500">{lang === "ar" ? "رسوم الاشتراك" : "Subscription fee"}</span>
+                  <span className="font-semibold text-teal-700">{lang === "ar" ? "مجاني" : "Free"}</span>
+                </div>
               </div>
             </div>
 
-            <div className="rounded-md border border-stone-100 bg-stone-50 px-3 py-2 text-xs text-stone-500">
-              <span className="font-medium">{t(lang, "email_label")}:</span> {info.email}
-            </div>
-
-            {payError && (
-              <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{payError}</p>
+            {createError && (
+              <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{createError}</p>
             )}
 
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                disabled={paying}
+                disabled={creating}
                 className="flex-1 rounded-md border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-100 disabled:opacity-40"
               >
                 {t(lang, "back_btn")}
               </button>
               <button
                 type="button"
-                onClick={handlePay}
-                disabled={paying}
+                onClick={handleCreate}
+                disabled={creating}
                 className="flex-1 rounded-md bg-teal-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-teal-700 disabled:opacity-50"
               >
-                {paying
-                  ? t(lang, "preparing_payment_btn")
-                  : `${t(lang, "pay_now_btn")} ${feeAed} AED`}
+                {creating
+                  ? (lang === "ar" ? "جارٍ الإنشاء…" : "Creating…")
+                  : (lang === "ar" ? "إنشاء المتجر" : "Create Store")}
               </button>
             </div>
           </div>
