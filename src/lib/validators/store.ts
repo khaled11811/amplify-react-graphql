@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DEFAULT_THEME_COLOR, STORE_BACKGROUND_TYPES, STORE_FONTS, PRESET_BACKGROUNDS, STORE_BUTTON_SHAPES, STORE_CARD_STYLES } from "@/lib/theme";
+import { DEFAULT_THEME_COLOR, STORE_BACKGROUND_TYPES, STORE_FONTS, PRESET_BACKGROUNDS, STORE_BUTTON_SHAPES, STORE_CARD_STYLES, STORE_SORT_OPTIONS } from "@/lib/theme";
 
 const STORE_LANGUAGE_VALUES = ["en", "ar"] as const;
 
@@ -74,6 +74,9 @@ export const storeAppearanceSchema = z
     button_shape: z.enum(STORE_BUTTON_SHAPES).default("rounded"),
     product_card_style: z.enum(STORE_CARD_STYLES).default("grid"),
     products_per_row: z.coerce.number().int().min(2).max(4).default(3),
+    announcement_text: z.string().trim().max(200).optional(),
+    announcement_active: z.coerce.boolean().default(false),
+    product_sort_default: z.enum(STORE_SORT_OPTIONS).default("newest"),
   })
   .transform((data) => {
     let background_value: string | null = null;
@@ -94,6 +97,9 @@ export const storeAppearanceSchema = z
       button_shape: data.button_shape,
       product_card_style: data.product_card_style,
       products_per_row: data.products_per_row,
+      announcement_text: data.announcement_text || null,
+      announcement_active: data.announcement_active,
+      product_sort_default: data.product_sort_default,
     };
   });
 

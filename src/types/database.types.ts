@@ -84,6 +84,11 @@ export type Store = {
   products_per_row: number;
   button_shape: string;
   product_card_style: string;
+  announcement_text: string | null;
+  announcement_active: boolean;
+  about_page_content: string | null;
+  product_sort_default: string;
+  favicon_url: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

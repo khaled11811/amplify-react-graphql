@@ -91,6 +91,9 @@ export function buttonShapeStyle(shape: string): React.CSSProperties {
 export const STORE_CARD_STYLES = ["grid", "list"] as const;
 export type StoreCardStyle = (typeof STORE_CARD_STYLES)[number];
 
+export const STORE_SORT_OPTIONS = ["newest", "oldest", "price_asc", "price_desc", "name_asc", "name_desc"] as const;
+export type StoreSortOption = (typeof STORE_SORT_OPTIONS)[number];
+
 export function backgroundStyle(store: {
   background_type: StoreBackgroundType;
   background_value: string | null;

@@ -32,6 +32,9 @@ export async function updateStoreAppearance(
     button_shape: formData.get("button_shape") || undefined,
     product_card_style: formData.get("product_card_style") || undefined,
     products_per_row: formData.get("products_per_row") || undefined,
+    announcement_text: formData.get("announcement_text") || undefined,
+    announcement_active: formData.get("announcement_active") === "true",
+    product_sort_default: formData.get("product_sort_default") || undefined,
   });
 
   if (!parsed.success) {
@@ -52,6 +55,9 @@ export async function updateStoreAppearance(
       button_shape: parsed.data.button_shape,
       product_card_style: parsed.data.product_card_style,
       products_per_row: parsed.data.products_per_row,
+      announcement_text: parsed.data.announcement_text,
+      announcement_active: parsed.data.announcement_active,
+      product_sort_default: parsed.data.product_sort_default,
     })
     .eq("id", profile.store_id);
 
@@ -166,6 +172,43 @@ export async function updateLicenseInfo(
   revalidatePath("/dashboard/settings/general");
   revalidatePath(`/store`, "layout");
   return { success: true };
+}
+
+export async function updateAboutContent(
+  _state: SettingsActionState,
+  formData: FormData
+): Promise<SettingsActionState> {
+  const profile = await getCurrentProfile();
+  if (profile?.role !== "store_manager" || !profile.store_id) {
+    return { error: "Not authorized." };
+  }
+
+  const content = (formData.get("about_page_content") as string | null)?.trim() || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("stores")
+    .update({ about_page_content: content })
+    .eq("id", profile.store_id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings/general");
+  revalidatePath("/store", "layout");
+  return { success: true };
+}
+
+export async function updateFaviconUrl(url: string | null) {
+  const profile = await getCurrentProfile();
+  if (profile?.role !== "store_manager" || !profile.store_id) return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("stores")
+    .update({ favicon_url: url })
+    .eq("id", profile.store_id);
+
+  revalidatePath("/store", "layout");
 }
 
 export async function updateBillingInfo(

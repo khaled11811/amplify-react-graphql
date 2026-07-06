@@ -4,6 +4,7 @@ import { getLang } from "@/lib/i18n/server";
 import { t, type Lang } from "@/lib/i18n/translations";
 import { StoreLogo } from "./StoreLogo";
 import { AppearanceForm } from "./AppearanceForm";
+import { FaviconUpload } from "./FaviconUpload";
 
 export default async function AppearanceSettingsPage() {
   const profile = await getCurrentProfile();
@@ -46,9 +47,18 @@ export default async function AppearanceSettingsPage() {
         buttonShape={store.button_shape ?? "rounded"}
         productCardStyle={store.product_card_style ?? "grid"}
         productsPerRow={store.products_per_row ?? 3}
+        announcementText={store.announcement_text ?? null}
+        announcementActive={store.announcement_active ?? false}
+        productSortDefault={store.product_sort_default ?? "newest"}
         storeLang={(store.store_language === "ar" ? "ar" : "en") as Lang}
         lang={lang}
       />
+
+      <hr className="border-stone-200 mt-4" />
+
+      <div className="mt-4">
+        <FaviconUpload storeId={store.id} faviconUrl={store.favicon_url ?? null} lang={lang} />
+      </div>
     </div>
   );
 }

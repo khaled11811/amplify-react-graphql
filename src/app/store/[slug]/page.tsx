@@ -19,32 +19,54 @@ export default async function StorePage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ category?: string; q?: string; page?: string }>;
+  searchParams: Promise<{ category?: string; q?: string; page?: string; sort?: string }>;
 }) {
   const { slug } = await params;
-  const { category, q, page: pageParam } = await searchParams;
+  const { category, q, page: pageParam, sort: sortParam } = await searchParams;
   const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
 
-  const store = await getStoreBySlug(slug);
-  if (!store) notFound();
+  const storeData = await getStoreBySlug(slug);
+  if (!storeData) notFound();
+  const store = storeData;
 
   const lang: Lang = store.store_language === "ar" ? "ar" : "en";
+  const sort = sortParam ?? store.product_sort_default ?? "newest";
 
   const [categories, { products, total }] = await Promise.all([
     getStoreCategories(store.id),
-    getStoreProducts(store.id, category, q, page),
+    getStoreProducts(store.id, category, q, page, sort),
   ]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   function buildUrl(p: number) {
-    const params = new URLSearchParams();
-    if (category) params.set("category", category);
-    if (q) params.set("q", q);
-    if (p > 1) params.set("page", String(p));
-    const qs = params.toString();
+    const sp = new URLSearchParams();
+    if (category) sp.set("category", category);
+    if (q) sp.set("q", q);
+    if (sort !== (store.product_sort_default ?? "newest")) sp.set("sort", sort);
+    if (p > 1) sp.set("page", String(p));
+    const qs = sp.toString();
     return `/store/${slug}${qs ? `?${qs}` : ""}`;
   }
+
+  function buildSortUrl(s: string) {
+    const sp = new URLSearchParams();
+    if (category) sp.set("category", category);
+    if (q) sp.set("q", q);
+    if (s !== (store.product_sort_default ?? "newest")) sp.set("sort", s);
+    const qs = sp.toString();
+    return `/store/${slug}${qs ? `?${qs}` : ""}`;
+  }
+
+  const SORT_OPTIONS = ["newest", "oldest", "price_asc", "price_desc", "name_asc", "name_desc"] as const;
+  const sortLabels: Record<string, string> = {
+    newest: t(lang, "sort_newest"),
+    oldest: t(lang, "sort_oldest"),
+    price_asc: t(lang, "sort_price_asc"),
+    price_desc: t(lang, "sort_price_desc"),
+    name_asc: t(lang, "sort_name_asc"),
+    name_desc: t(lang, "sort_name_desc"),
+  };
 
   return (
     <div>
@@ -88,6 +110,25 @@ export default async function StorePage({
           />
         </div>
       )}
+
+      <div className="mt-4 flex items-center gap-2">
+        <span className="text-xs text-stone-500">{t(lang, "sort_label")}:</span>
+        <div className="flex flex-wrap gap-1.5">
+          {SORT_OPTIONS.map((opt) => (
+            <Link
+              key={opt}
+              href={buildSortUrl(opt)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                sort === opt
+                  ? "bg-[var(--store-primary)] text-white"
+                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              {sortLabels[opt]}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       {store.product_card_style === "list" ? (
         <div className="mt-6 flex flex-col gap-2">

@@ -420,6 +420,39 @@ const en = {
   x_twitter_label: "X (Twitter)",
   social_handle_placeholder: "@yourhandle",
 
+  // Appearance - announcement banner
+  announcement_label: "Announcement Banner",
+  announcement_desc: "A thin strip shown above your store header for promotions or important notices.",
+  announcement_text_placeholder: "e.g. Free shipping on orders over 200 AED 🎉",
+  announcement_active_label: "Show banner",
+
+  // Appearance - product sort default
+  product_sort_label: "Default Product Sort",
+  product_sort_desc: "How products are ordered by default on your store page.",
+  sort_newest: "Newest first",
+  sort_oldest: "Oldest first",
+  sort_price_asc: "Price: low to high",
+  sort_price_desc: "Price: high to low",
+  sort_name_asc: "Name: A → Z",
+  sort_name_desc: "Name: Z → A",
+
+  // Appearance - favicon
+  favicon_label: "Store Favicon",
+  favicon_desc: "Small icon shown in browser tabs. Use a square PNG or ICO (32×32 or 64×64 px).",
+
+  // General - about page
+  about_page_label: "About Page",
+  about_page_desc: "Tell customers your store's story. A link will appear in the store footer.",
+  about_page_placeholder: "Tell the story of your store, your products, your values...",
+  about_page_save_btn: "Save About Page",
+  about_page_heading: "About Us",
+
+  // Store page - sort UI
+  sort_label: "Sort",
+
+  // WhatsApp button
+  whatsapp_chat_label: "Chat on WhatsApp",
+
   // Stripe Connect onboarding
   connect_intro: "Connect your bank account with Stripe to receive payments from your customers directly — no manual payout requests needed.",
   connect_country_label: "Country",
@@ -836,6 +869,39 @@ const ar: typeof en = {
   tiktok_label: "تيك توك",
   x_twitter_label: "إكس (تويتر)",
   social_handle_placeholder: "@معرّفك",
+
+  // Appearance - announcement banner
+  announcement_label: "شريط الإعلانات",
+  announcement_desc: "شريط رفيع يظهر أعلى متجرك للعروض أو الإشعارات المهمة.",
+  announcement_text_placeholder: "مثال: شحن مجاني للطلبات التي تتجاوز 200 درهم 🎉",
+  announcement_active_label: "إظهار الشريط",
+
+  // Appearance - product sort default
+  product_sort_label: "ترتيب المنتجات الافتراضي",
+  product_sort_desc: "كيفية ترتيب المنتجات افتراضياً في صفحة متجرك.",
+  sort_newest: "الأحدث أولاً",
+  sort_oldest: "الأقدم أولاً",
+  sort_price_asc: "السعر: من الأقل إلى الأعلى",
+  sort_price_desc: "السعر: من الأعلى إلى الأقل",
+  sort_name_asc: "الاسم: أ → ي",
+  sort_name_desc: "الاسم: ي → أ",
+
+  // Appearance - favicon
+  favicon_label: "أيقونة المتجر (Favicon)",
+  favicon_desc: "أيقونة صغيرة تظهر في تبويب المتصفح. استخدم PNG أو ICO مربع الشكل (32×32 أو 64×64 بكسل).",
+
+  // General - about page
+  about_page_label: "صفحة من نحن",
+  about_page_desc: "أخبر العملاء قصة متجرك. سيظهر رابط في تذييل المتجر.",
+  about_page_placeholder: "أخبرنا قصة متجرك، منتجاتك، قيمك...",
+  about_page_save_btn: "حفظ صفحة من نحن",
+  about_page_heading: "من نحن",
+
+  // Store page - sort UI
+  sort_label: "الترتيب",
+
+  // WhatsApp button
+  whatsapp_chat_label: "تحدث عبر واتساب",
 
   // Stripe Connect onboarding
   connect_intro: "اربط حسابك البنكي عبر Stripe لاستقبال المدفوعات من عملائك مباشرة — دون الحاجة لطلب استرداد يدوي.",

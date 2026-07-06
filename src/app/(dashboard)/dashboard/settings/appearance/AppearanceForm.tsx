@@ -11,9 +11,11 @@ import {
   FONT_LABELS,
   STORE_BUTTON_SHAPES,
   STORE_CARD_STYLES,
+  STORE_SORT_OPTIONS,
   type StoreBackgroundType,
   type StoreFont,
   type StoreButtonShape,
+  type StoreSortOption,
 } from "@/lib/theme";
 import { useActionToast } from "@/lib/toast/useActionToast";
 import { t, type Lang } from "@/lib/i18n/translations";
@@ -33,6 +35,9 @@ export function AppearanceForm({
   buttonShape,
   productCardStyle,
   productsPerRow,
+  announcementText,
+  announcementActive,
+  productSortDefault,
   storeLang,
   lang,
 }: {
@@ -48,6 +53,9 @@ export function AppearanceForm({
   buttonShape: string;
   productCardStyle: string;
   productsPerRow: number;
+  announcementText: string | null;
+  announcementActive: boolean;
+  productSortDefault: string;
   storeLang: Lang;
   lang: Lang;
 }) {
@@ -77,6 +85,12 @@ export function AppearanceForm({
     (STORE_CARD_STYLES as readonly string[]).includes(productCardStyle) ? productCardStyle : "grid"
   );
   const [selectedPerRow, setSelectedPerRow] = useState(productsPerRow ?? 3);
+  const [announcementOn, setAnnouncementOn] = useState(announcementActive);
+  const [selectedSort, setSelectedSort] = useState<StoreSortOption>(
+    (STORE_SORT_OPTIONS as readonly string[]).includes(productSortDefault)
+      ? productSortDefault as StoreSortOption
+      : "newest"
+  );
 
   const BG_LABELS: Record<StoreBackgroundType, string> = {
     none: t(lang, "bg_none"),
@@ -326,6 +340,60 @@ export function AppearanceForm({
       {selectedCardStyle === "list" && (
         <input type="hidden" name="products_per_row" value={selectedPerRow} />
       )}
+
+      <hr className="border-stone-200" />
+
+      {/* Announcement banner */}
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">{t(lang, "announcement_label")}</span>
+        <p className="text-xs text-stone-500">{t(lang, "announcement_desc")}</p>
+        <input type="hidden" name="announcement_active" value={String(announcementOn)} />
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={announcementOn}
+            onClick={() => setAnnouncementOn((v: boolean) => !v)}
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+              announcementOn ? "bg-teal-600" : "bg-stone-300"
+            }`}
+          >
+            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
+              announcementOn ? "translate-x-5" : "translate-x-0"
+            }`} />
+          </button>
+          <span className="text-sm text-stone-600">{t(lang, "announcement_active_label")}</span>
+        </div>
+        <input
+          name="announcement_text"
+          type="text"
+          maxLength={200}
+          defaultValue={announcementText ?? ""}
+          placeholder={t(lang, "announcement_text_placeholder")}
+          className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+        />
+      </div>
+
+      <hr className="border-stone-200" />
+
+      {/* Product sort default */}
+      <div className="flex flex-col gap-2">
+        <label htmlFor="product_sort_default" className="text-sm font-medium">{t(lang, "product_sort_label")}</label>
+        <p className="text-xs text-stone-500">{t(lang, "product_sort_desc")}</p>
+        <select
+          id="product_sort_default"
+          name="product_sort_default"
+          value={selectedSort}
+          onChange={(e) => setSelectedSort(e.target.value as StoreSortOption)}
+          className="max-w-xs rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+        >
+          {STORE_SORT_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>
+              {t(lang, `sort_${opt}` as Parameters<typeof t>[1])}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 

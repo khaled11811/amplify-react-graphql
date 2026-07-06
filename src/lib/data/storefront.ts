@@ -104,7 +104,7 @@ export const getStoreCategories = cache(async (storeId: string): Promise<Categor
 const PAGE_SIZE = 30;
 
 export const getStoreProducts = cache(
-  async (storeId: string, categorySlug?: string, search?: string, page = 1) => {
+  async (storeId: string, categorySlug?: string, search?: string, page = 1, sort = "newest") => {
     const supabase = await createClient();
 
     let categoryIds: string[] | undefined;
@@ -128,12 +128,22 @@ export const getStoreProducts = cache(
 
     const offset = (page - 1) * PAGE_SIZE;
 
+    const sortMap: Record<string, { column: string; ascending: boolean }> = {
+      newest: { column: "created_at", ascending: false },
+      oldest: { column: "created_at", ascending: true },
+      price_asc: { column: "price", ascending: true },
+      price_desc: { column: "price", ascending: false },
+      name_asc: { column: "name", ascending: true },
+      name_desc: { column: "name", ascending: false },
+    };
+    const { column, ascending } = sortMap[sort] ?? sortMap.newest;
+
     let query = supabase
       .from("products")
       .select("*", { count: "exact" })
       .eq("store_id", storeId)
       .eq("is_active", true)
-      .order("created_at", { ascending: false })
+      .order(column, { ascending })
       .range(offset, offset + PAGE_SIZE - 1);
 
     if (categoryIds) {
