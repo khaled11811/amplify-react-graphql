@@ -81,6 +81,8 @@ export type Store = {
   tax_registration_number: string | null;
   vat_certificate_url: string | null;
   footer_text: string | null;
+  hero_title: string | null;
+  hero_subtitle: string | null;
   products_per_row: number;
   button_shape: string;
   product_card_style: string;
@@ -118,6 +120,7 @@ export type Product = {
   currency: string; // e.g. "usd"
   stock: number;
   is_active: boolean;
+  is_featured: boolean;
   created_at: string;
   updated_at: string;
 };

@@ -22,6 +22,8 @@ export async function updateStoreAppearance(
 
   const parsed = storeAppearanceSchema.safeParse({
     description: formData.get("description") || undefined,
+    hero_title: formData.get("hero_title") as string || undefined,
+    hero_subtitle: formData.get("hero_subtitle") as string || undefined,
     footer_text: formData.get("footer_text") || undefined,
     theme: formData.get("theme"),
     header_color: formData.get("header_color") || undefined,
@@ -47,6 +49,8 @@ export async function updateStoreAppearance(
     .from("stores")
     .update({
       description: parsed.data.description ?? null,
+      hero_title: parsed.data.hero_title ?? null,
+      hero_subtitle: parsed.data.hero_subtitle ?? null,
       footer_text: parsed.data.footer_text,
       theme: parsed.data.theme,
       header_color: parsed.data.header_color,

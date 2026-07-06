@@ -73,6 +73,21 @@ export const getStoreBySlug = cache(async (slug: string) => {
   return data;
 });
 
+
+export const getFeaturedProducts = cache(async (storeId: string): Promise<ProductWithImages[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('products')
+    .select('*')
+    .eq('store_id', storeId)
+    .eq('is_active', true)
+    .eq('is_featured', true)
+    .order('created_at', { ascending: false })
+    .limit(8);
+  if (!data?.length) return [];
+  return attachImages(supabase, data);
+});
+
 export const getStoreCategories = cache(async (storeId: string): Promise<CategoryNode[]> => {
   const supabase = await createClient();
 

@@ -183,6 +183,15 @@ export function ProductForm({ categories, product, storeId, currency = "usd", is
         {t(lang, "visible_in_store_label")}
       </label>
 
+      <label className="flex items-center gap-2 text-sm font-medium">
+        <input
+          type="checkbox"
+          name="is_featured"
+          defaultChecked={product?.is_featured ?? false}
+        />
+        {t(lang, "product_featured_label")}
+      </label>
+
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 
       <button

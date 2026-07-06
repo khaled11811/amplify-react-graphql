@@ -10,6 +10,7 @@ import { t, type Lang } from "@/lib/i18n/translations";
 import { CartLink } from "./CartLink";
 import { StoreContact } from "./StoreContact";
 import { AnnouncementTicker } from "./AnnouncementTicker";
+import { BackToTop } from "./BackToTop";
 
 export async function generateMetadata({
   params,
@@ -195,6 +196,8 @@ export default async function StoreLayout({
             <p className="mt-2 text-center text-xs text-stone-400">{t(lang, "powered_by_text")}</p>
           </div>
         </footer>
+
+        <BackToTop dir={lang === "ar" ? "rtl" : "ltr"} />
 
         {waUrl && (
           <a

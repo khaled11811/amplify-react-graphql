@@ -33,6 +33,8 @@ export function AppearanceForm({
   backgroundValue,
   bannerUrl,
   buttonShape,
+  heroTitle,
+  heroSubtitle,
   productCardStyle,
   productsPerRow,
   announcementTexts,
@@ -45,6 +47,8 @@ export function AppearanceForm({
   storeId: string;
   description: string | null;
   footerText: string | null;
+  heroTitle: string | null;
+  heroSubtitle: string | null;
   theme: string;
   headerColor: string;
   font: StoreFont;
@@ -116,6 +120,32 @@ export function AppearanceForm({
           maxLength={500}
           defaultValue={description ?? ""}
           placeholder={t(lang, "store_description_placeholder")}
+          className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+        />
+      </div>
+
+      <hr className="border-stone-200" />
+
+      {/* Hero banner */}
+      <div className="flex flex-col gap-3">
+        <span className="text-sm font-medium">{t(lang, "hero_title_label")}</span>
+        <p className="text-xs text-stone-500">{t(lang, "hero_title_desc")}</p>
+        <input
+          id="hero_title"
+          name="hero_title"
+          type="text"
+          maxLength={120}
+          defaultValue={heroTitle ?? ""}
+          placeholder={t(lang, "hero_title_placeholder")}
+          className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+        />
+        <input
+          id="hero_subtitle"
+          name="hero_subtitle"
+          type="text"
+          maxLength={200}
+          defaultValue={heroSubtitle ?? ""}
+          placeholder={t(lang, "hero_subtitle_placeholder")}
           className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
         />
       </div>

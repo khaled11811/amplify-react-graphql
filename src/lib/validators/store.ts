@@ -53,6 +53,7 @@ export const productSchema = z.object({
   stock: z.number().int().nonnegative().default(0),
   category_id: z.string().uuid().nullable().optional(),
   is_active: z.boolean().default(true),
+  is_featured: z.boolean().default(false),
 });
 
 const presetBackgroundIds = PRESET_BACKGROUNDS.map((p) => p.id) as [string, ...string[]];
@@ -65,6 +66,8 @@ export const storeAppearanceSchema = z
   .object({
     description: z.string().trim().max(500).optional(),
     footer_text: z.string().trim().max(200).optional(),
+    hero_title: z.string().trim().max(120).optional(),
+    hero_subtitle: z.string().trim().max(200).optional(),
     theme: hexColorSchema.optional(),
     header_color: hexColorSchema.optional(),
     font: z.enum(STORE_FONTS),
@@ -95,6 +98,8 @@ export const storeAppearanceSchema = z
     return {
       description: data.description,
       footer_text: data.footer_text || null,
+      hero_title: data.hero_title || null,
+      hero_subtitle: data.hero_subtitle || null,
       theme: data.theme || DEFAULT_THEME_COLOR,
       header_color: data.header_color || "#ffffff",
       font: data.font,

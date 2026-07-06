@@ -38,6 +38,8 @@ export default async function AppearanceSettingsPage() {
         storeId={store.id}
         description={store.description}
         footerText={store.footer_text ?? null}
+        heroTitle={store.hero_title ?? null}
+        heroSubtitle={store.hero_subtitle ?? null}
         theme={store.theme}
         headerColor={store.header_color}
         font={store.font}

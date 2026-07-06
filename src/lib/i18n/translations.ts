@@ -77,6 +77,7 @@ const en = {
   category_label: "Category",
   no_category_option: "No category",
   visible_in_store_label: "Visible in store",
+  product_featured_label: "Feature this product (show in Featured row)",
   create_product_btn: "Create product",
   images_label: "Images",
 
@@ -399,6 +400,17 @@ const en = {
   fee_saved_toast: "Subscription fee updated.",
   store_url_label: "Store URL",
 
+  // Appearance - hero banner
+  hero_title_label: "Hero Banner",
+  hero_title_desc: "A large headline shown at the top of your store to grab attention.",
+  hero_title_placeholder: "e.g. Summer Collection 2025",
+  hero_subtitle_placeholder: "e.g. Free shipping on orders over 200 AED",
+
+  // Appearance - storefront badges
+  badge_out_of_stock: "Out of Stock",
+  badge_new: "New",
+  featured_products_heading: "Featured",
+
   // Appearance - new customization options
   footer_tagline_label: "Footer Tagline",
   footer_tagline_desc: "A short line shown at the bottom of your store (slogan, copyright, etc.)",
@@ -557,6 +569,7 @@ const ar: typeof en = {
   category_label: "الفئة",
   no_category_option: "بدون فئة",
   visible_in_store_label: "مرئي في المتجر",
+  product_featured_label: "تمييز هذا المنتج (يظهر في قسم المميزة)",
   create_product_btn: "إنشاء المنتج",
   images_label: "الصور",
 
@@ -853,6 +866,17 @@ const ar: typeof en = {
   fee_zero_warning: "يجب أن تكون الرسوم أكبر من 0 درهم.",
   fee_saved_toast: "تم تحديث رسوم الاشتراك.",
   store_url_label: "رابط المتجر",
+
+  // Appearance - hero banner
+  hero_title_label: "البانر الرئيسي",
+  hero_title_desc: "عنوان كبير يظهر في أعلى متجرك لجذب الانتباه.",
+  hero_title_placeholder: "مثال: مجموعة الصيف 2025",
+  hero_subtitle_placeholder: "مثال: شحن مجاني للطلبات فوق 200 درهم",
+
+  // Appearance - storefront badges
+  badge_out_of_stock: "نفذ المخزون",
+  badge_new: "جديد",
+  featured_products_heading: "مميزة",
 
   // Appearance - new customization options
   footer_tagline_label: "شعار التذييل",
