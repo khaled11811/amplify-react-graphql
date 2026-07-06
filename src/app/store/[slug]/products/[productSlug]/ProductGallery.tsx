@@ -26,10 +26,11 @@ export function ProductGallery({
     <div className="mt-4">
       <div className="relative aspect-square w-full overflow-hidden rounded-md bg-stone-100">
         <Image
+          key={active.id}
           src={active.image_url}
           alt={productName}
           fill
-          className="object-cover"
+          className="object-cover animate-slide-in-fade"
           priority
         />
 
