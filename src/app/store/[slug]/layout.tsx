@@ -9,6 +9,7 @@ import { themeStyle, backgroundStyle, getContrastTextColor, DEFAULT_THEME_COLOR,
 import { t, type Lang } from "@/lib/i18n/translations";
 import { CartLink } from "./CartLink";
 import { StoreContact } from "./StoreContact";
+import { AnnouncementTicker } from "./AnnouncementTicker";
 
 export async function generateMetadata({
   params,
@@ -92,17 +93,14 @@ export default async function StoreLayout({
 
   const whatsappNumber = (store.contact_info as Record<string, string> | null)?.whatsapp_number;
 
+  const themeColor = store.theme || DEFAULT_THEME_COLOR;
   const announcementBanner =
-    store.announcement_active && store.announcement_text ? (
-      <div
-        className="px-4 py-2 text-center text-sm font-medium"
-        style={{
-          backgroundColor: store.theme || DEFAULT_THEME_COLOR,
-          color: getContrastTextColor(store.theme || DEFAULT_THEME_COLOR),
-        }}
-      >
-        {store.announcement_text}
-      </div>
+    store.announcement_active && store.announcement_texts?.length ? (
+      <AnnouncementTicker
+        texts={store.announcement_texts}
+        bgColor={themeColor}
+        textColor={getContrastTextColor(themeColor)}
+      />
     ) : null;
 
   const waUrl = whatsappNumber

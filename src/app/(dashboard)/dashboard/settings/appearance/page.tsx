@@ -47,7 +47,7 @@ export default async function AppearanceSettingsPage() {
         buttonShape={store.button_shape ?? "rounded"}
         productCardStyle={store.product_card_style ?? "grid"}
         productsPerRow={store.products_per_row ?? 3}
-        announcementText={store.announcement_text ?? null}
+        announcementTexts={store.announcement_texts ?? []}
         announcementActive={store.announcement_active ?? false}
         productSortDefault={store.product_sort_default ?? "newest"}
         storeLang={(store.store_language === "ar" ? "ar" : "en") as Lang}

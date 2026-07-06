@@ -80,3 +80,16 @@ body {
 .animate-toast-out {
   animation: toast-out 0.3s ease-in both;
 }
+
+@keyframes ticker {
+  0%   { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-ticker {
+  animation: ticker var(--ticker-duration, 30s) linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}

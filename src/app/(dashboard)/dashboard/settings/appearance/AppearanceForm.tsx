@@ -35,7 +35,7 @@ export function AppearanceForm({
   buttonShape,
   productCardStyle,
   productsPerRow,
-  announcementText,
+  announcementTexts,
   announcementActive,
   productSortDefault,
   storeLang,
@@ -53,7 +53,7 @@ export function AppearanceForm({
   buttonShape: string;
   productCardStyle: string;
   productsPerRow: number;
-  announcementText: string | null;
+  announcementTexts: string[];
   announcementActive: boolean;
   productSortDefault: string;
   storeLang: Lang;
@@ -86,6 +86,7 @@ export function AppearanceForm({
   );
   const [selectedPerRow, setSelectedPerRow] = useState(productsPerRow ?? 3);
   const [announcementOn, setAnnouncementOn] = useState(announcementActive);
+  const [announcements, setAnnouncements] = useState<string[]>(announcementTexts);
   const [selectedSort, setSelectedSort] = useState<StoreSortOption>(
     (STORE_SORT_OPTIONS as readonly string[]).includes(productSortDefault)
       ? productSortDefault as StoreSortOption
@@ -344,10 +345,11 @@ export function AppearanceForm({
       <hr className="border-stone-200" />
 
       {/* Announcement banner */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <span className="text-sm font-medium">{t(lang, "announcement_label")}</span>
         <p className="text-xs text-stone-500">{t(lang, "announcement_desc")}</p>
         <input type="hidden" name="announcement_active" value={String(announcementOn)} />
+        <input type="hidden" name="announcement_texts" value={JSON.stringify(announcements)} />
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -364,14 +366,49 @@ export function AppearanceForm({
           </button>
           <span className="text-sm text-stone-600">{t(lang, "announcement_active_label")}</span>
         </div>
-        <input
-          name="announcement_text"
-          type="text"
-          maxLength={200}
-          defaultValue={announcementText ?? ""}
-          placeholder={t(lang, "announcement_text_placeholder")}
-          className="rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
-        />
+
+        <div className="flex flex-col gap-2">
+          {announcements.map((text, i) => (
+            <div key={i} className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={text}
+                  maxLength={120}
+                  placeholder={t(lang, "announcement_item_placeholder")}
+                  onChange={(e) => {
+                    const next = [...announcements];
+                    next[i] = e.target.value;
+                    setAnnouncements(next);
+                  }}
+                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setAnnouncements(announcements.filter((_, j) => j !== i))}
+                  className="rounded-md border border-stone-200 px-2 py-2 text-xs text-stone-500 hover:border-red-300 hover:text-red-600 transition-colors"
+                >
+                  {t(lang, "announcement_remove_btn")}
+                </button>
+              </div>
+              <p className={`text-xs text-right ${text.length > 110 ? "text-amber-600" : "text-stone-400"}`}>
+                {text.length}/120
+              </p>
+            </div>
+          ))}
+
+          {announcements.length < 5 ? (
+            <button
+              type="button"
+              onClick={() => setAnnouncements([...announcements, ""])}
+              className="self-start rounded-md border border-dashed border-stone-300 px-3 py-2 text-sm text-stone-500 hover:border-stone-400 hover:text-stone-700 transition-colors"
+            >
+              + {t(lang, "announcement_add_btn")}
+            </button>
+          ) : (
+            <p className="text-xs text-stone-500">{t(lang, "announcement_max_reached")}</p>
+          )}
+        </div>
       </div>
 
       <hr className="border-stone-200" />

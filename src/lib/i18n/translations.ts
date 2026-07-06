@@ -422,9 +422,13 @@ const en = {
 
   // Appearance - announcement banner
   announcement_label: "Announcement Banner",
-  announcement_desc: "A thin strip shown above your store header for promotions or important notices.",
+  announcement_desc: "Add up to 5 scrolling messages shown above your store header. Great for promotions, shipping notices, or announcements.",
   announcement_text_placeholder: "e.g. Free shipping on orders over 200 AED 🎉",
   announcement_active_label: "Show banner",
+  announcement_add_btn: "Add announcement",
+  announcement_item_placeholder: "Announcement text (max 120 chars)",
+  announcement_max_reached: "Maximum 5 announcements reached",
+  announcement_remove_btn: "Remove",
 
   // Appearance - product sort default
   product_sort_label: "Default Product Sort",
@@ -872,9 +876,13 @@ const ar: typeof en = {
 
   // Appearance - announcement banner
   announcement_label: "شريط الإعلانات",
-  announcement_desc: "شريط رفيع يظهر أعلى متجرك للعروض أو الإشعارات المهمة.",
+  announcement_desc: "أضف حتى 5 رسائل متحركة تظهر أعلى متجرك. مثالية للعروض وإشعارات الشحن والإعلانات.",
   announcement_text_placeholder: "مثال: شحن مجاني للطلبات التي تتجاوز 200 درهم 🎉",
   announcement_active_label: "إظهار الشريط",
+  announcement_add_btn: "إضافة إعلان",
+  announcement_item_placeholder: "نص الإعلان (حد أقصى 120 حرفاً)",
+  announcement_max_reached: "وصلت إلى الحد الأقصى (5 إعلانات)",
+  announcement_remove_btn: "حذف",
 
   // Appearance - product sort default
   product_sort_label: "ترتيب المنتجات الافتراضي",

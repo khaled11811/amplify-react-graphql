@@ -32,8 +32,8 @@ export async function updateStoreAppearance(
     button_shape: formData.get("button_shape") || undefined,
     product_card_style: formData.get("product_card_style") || undefined,
     products_per_row: formData.get("products_per_row") || undefined,
-    announcement_text: formData.get("announcement_text") || undefined,
     announcement_active: formData.get("announcement_active") === "true",
+    announcement_texts: JSON.parse((formData.get("announcement_texts") as string) || "[]"),
     product_sort_default: formData.get("product_sort_default") || undefined,
   });
 
@@ -55,8 +55,8 @@ export async function updateStoreAppearance(
       button_shape: parsed.data.button_shape,
       product_card_style: parsed.data.product_card_style,
       products_per_row: parsed.data.products_per_row,
-      announcement_text: parsed.data.announcement_text,
       announcement_active: parsed.data.announcement_active,
+      announcement_texts: parsed.data.announcement_texts,
       product_sort_default: parsed.data.product_sort_default,
     })
     .eq("id", profile.store_id);

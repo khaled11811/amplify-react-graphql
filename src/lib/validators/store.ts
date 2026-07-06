@@ -74,8 +74,13 @@ export const storeAppearanceSchema = z
     button_shape: z.enum(STORE_BUTTON_SHAPES).default("rounded"),
     product_card_style: z.enum(STORE_CARD_STYLES).default("grid"),
     products_per_row: z.coerce.number().int().min(2).max(4).default(3),
-    announcement_text: z.string().trim().max(200).optional(),
     announcement_active: z.coerce.boolean().default(false),
+    announcement_texts: z.array(
+      z.string().trim()
+        .min(1, "Announcement cannot be empty")
+        .max(120, "Max 120 characters per announcement")
+        .regex(/^[^<>{}`\\]*$/, "Characters < > { } ` \\ are not allowed")
+    ).max(5, "Up to 5 announcements allowed").default([]),
     product_sort_default: z.enum(STORE_SORT_OPTIONS).default("newest"),
   })
   .transform((data) => {
@@ -97,8 +102,8 @@ export const storeAppearanceSchema = z
       button_shape: data.button_shape,
       product_card_style: data.product_card_style,
       products_per_row: data.products_per_row,
-      announcement_text: data.announcement_text || null,
       announcement_active: data.announcement_active,
+      announcement_texts: data.announcement_texts,
       product_sort_default: data.product_sort_default,
     };
   });
