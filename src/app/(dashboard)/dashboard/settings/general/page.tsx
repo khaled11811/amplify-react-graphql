@@ -4,7 +4,6 @@ import { getLang } from "@/lib/i18n/server";
 import type { Lang } from "@/lib/i18n/translations";
 import { GeneralForm } from "./GeneralForm";
 import { LicenseSection } from "./LicenseSection";
-import { AboutSection } from "./AboutSection";
 
 export default async function GeneralSettingsPage() {
   const profile = await getCurrentProfile();
@@ -16,7 +15,7 @@ export default async function GeneralSettingsPage() {
   const [{ data: store }, { data: ownerProfile }] = await Promise.all([
     supabase
       .from("stores")
-      .select("name, contact_info, store_language, trade_license_number, trade_license_expiry, trade_license_doc_url, tax_registration_number, vat_certificate_url, about_page_content")
+      .select("name, contact_info, store_language, trade_license_number, trade_license_expiry, trade_license_doc_url, tax_registration_number, vat_certificate_url")
       .eq("id", profile.store_id)
       .single(),
     supabase.from("profiles").select("full_name").eq("id", profile.id).single(),
@@ -37,10 +36,6 @@ export default async function GeneralSettingsPage() {
         storeLang={storeLang}
         lang={lang}
       />
-
-      <hr className="border-stone-200" />
-
-      <AboutSection aboutPageContent={store.about_page_content ?? null} lang={lang} />
 
       <hr className="border-stone-200" />
 

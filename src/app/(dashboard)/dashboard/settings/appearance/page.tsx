@@ -5,6 +5,7 @@ import { t, type Lang } from "@/lib/i18n/translations";
 import { StoreLogo } from "./StoreLogo";
 import { AppearanceForm } from "./AppearanceForm";
 import { FaviconUpload } from "./FaviconUpload";
+import { AboutSection } from "./AboutSection";
 
 export default async function AppearanceSettingsPage() {
   const profile = await getCurrentProfile();
@@ -61,6 +62,12 @@ export default async function AppearanceSettingsPage() {
 
       <div className="mt-4">
         <FaviconUpload storeId={store.id} faviconUrl={store.favicon_url ?? null} lang={lang} />
+      </div>
+
+      <hr className="border-stone-200 mt-4" />
+
+      <div className="mt-4">
+        <AboutSection aboutPageContent={store.about_page_content ?? null} lang={lang} />
       </div>
     </div>
   );
