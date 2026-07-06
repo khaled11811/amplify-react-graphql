@@ -93,13 +93,13 @@ export default async function StoreLayout({
 
   const whatsappNumber = (store.contact_info as Record<string, string> | null)?.whatsapp_number;
 
-  const themeColor = store.theme || DEFAULT_THEME_COLOR;
+  const announcementBgColor = store.announcement_color || "#000000";
   const announcementBanner =
     store.announcement_active && store.announcement_texts?.length ? (
       <AnnouncementTicker
         texts={store.announcement_texts}
-        bgColor={themeColor}
-        textColor={getContrastTextColor(themeColor)}
+        bgColor={announcementBgColor}
+        textColor={getContrastTextColor(announcementBgColor)}
       />
     ) : null;
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useState } from "react";
 import Image from "next/image";
@@ -36,6 +36,7 @@ export function AppearanceForm({
   productCardStyle,
   productsPerRow,
   announcementTexts,
+  announcementColor,
   announcementActive,
   productSortDefault,
   storeLang,
@@ -54,6 +55,7 @@ export function AppearanceForm({
   productCardStyle: string;
   productsPerRow: number;
   announcementTexts: string[];
+  announcementColor: string;
   announcementActive: boolean;
   productSortDefault: string;
   storeLang: Lang;
@@ -87,6 +89,7 @@ export function AppearanceForm({
   const [selectedPerRow, setSelectedPerRow] = useState(productsPerRow ?? 3);
   const [announcementOn, setAnnouncementOn] = useState(announcementActive);
   const [announcements, setAnnouncements] = useState<string[]>(announcementTexts);
+  const [announcementBgColor, setAnnouncementBgColor] = useState(announcementColor || "#000000");
   const [selectedSort, setSelectedSort] = useState<StoreSortOption>(
     (STORE_SORT_OPTIONS as readonly string[]).includes(productSortDefault)
       ? productSortDefault as StoreSortOption
@@ -344,92 +347,124 @@ export function AppearanceForm({
 
       <hr className="border-stone-200" />
 
-      {/* Announcement banner */}
-      <div className="flex flex-col gap-3">
-        <span className="text-sm font-medium">{t(lang, "announcement_label")}</span>
-        <p className="text-xs text-stone-500">{t(lang, "announcement_desc")}</p>
-        <input type="hidden" name="announcement_active" value={String(announcementOn)} />
-        <input type="hidden" name="announcement_texts" value={JSON.stringify(announcements)} />
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={announcementOn}
-            onClick={() => setAnnouncementOn((v: boolean) => !v)}
-            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-              announcementOn ? "bg-teal-600" : "bg-stone-300"
-            }`}
-          >
-            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
-              announcementOn ? "translate-x-5" : "translate-x-0"
-            }`} />
-          </button>
-          <span className="text-sm text-stone-600">{t(lang, "announcement_active_label")}</span>
-        </div>
+      {/* Announcement banner + product sort — grouped */}
+      <div className="flex flex-col gap-6 rounded-lg border border-stone-200 p-4">
 
-        <div className="flex flex-col gap-2">
-          {announcements.map((text, i) => (
-            <div key={i} className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={text}
-                  maxLength={120}
-                  placeholder={t(lang, "announcement_item_placeholder")}
-                  onChange={(e) => {
-                    const next = [...announcements];
-                    next[i] = e.target.value;
-                    setAnnouncements(next);
-                  }}
-                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
-                />
-                <button
-                  type="button"
-                  onClick={() => setAnnouncements(announcements.filter((_, j) => j !== i))}
-                  className="rounded-md border border-stone-200 px-2 py-2 text-xs text-stone-500 hover:border-red-300 hover:text-red-600 transition-colors"
-                >
-                  {t(lang, "announcement_remove_btn")}
-                </button>
-              </div>
-              <p className={`text-xs text-right ${text.length > 110 ? "text-amber-600" : "text-stone-400"}`}>
-                {text.length}/120
-              </p>
-            </div>
-          ))}
+        {/* Announcement banner */}
+        <div className="flex flex-col gap-3">
+          <span className="text-sm font-medium">{t(lang, "announcement_label")}</span>
+          <p className="text-xs text-stone-500">{t(lang, "announcement_desc")}</p>
+          <input type="hidden" name="announcement_active" value={String(announcementOn)} />
+          <input type="hidden" name="announcement_texts" value={JSON.stringify(announcements)} />
+          <input type="hidden" name="announcement_color" value={announcementBgColor} />
 
-          {announcements.length < 5 ? (
+          {/* Toggle */}
+          <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setAnnouncements([...announcements, ""])}
-              className="self-start rounded-md border border-dashed border-stone-300 px-3 py-2 text-sm text-stone-500 hover:border-stone-400 hover:text-stone-700 transition-colors"
+              role="switch"
+              aria-checked={announcementOn}
+              onClick={() => setAnnouncementOn((v: boolean) => !v)}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                announcementOn ? "bg-teal-600" : "bg-stone-300"
+              }`}
             >
-              + {t(lang, "announcement_add_btn")}
+              <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
+                announcementOn ? "translate-x-5" : "translate-x-0"
+              }`} />
             </button>
-          ) : (
-            <p className="text-xs text-stone-500">{t(lang, "announcement_max_reached")}</p>
-          )}
+            <span className="text-sm text-stone-600">{t(lang, "announcement_active_label")}</span>
+          </div>
+
+          {/* Bar color */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-stone-600">{t(lang, "announcement_color_label")}</span>
+            <input
+              type="color"
+              value={announcementBgColor}
+              onChange={(e) => setAnnouncementBgColor(e.target.value)}
+              className="h-9 w-14 cursor-pointer rounded-md border border-stone-300"
+            />
+            <span className="text-xs text-stone-500">{announcementBgColor}</span>
+            {/* Live preview strip */}
+            <span
+              className="flex-1 rounded-md px-3 py-1 text-xs font-medium truncate"
+              style={{
+                backgroundColor: announcementBgColor,
+                color: "#ffffff",
+                textShadow: "0 0 4px rgba(0,0,0,0.4)",
+              }}
+            >
+              {announcements[0] || "Preview"}
+            </span>
+          </div>
+
+          {/* Announcement items */}
+          <div className="flex flex-col gap-2">
+            {announcements.map((text, i) => (
+              <div key={i} className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={text}
+                    maxLength={120}
+                    placeholder={t(lang, "announcement_item_placeholder")}
+                    onChange={(e) => {
+                      const next = [...announcements];
+                      next[i] = e.target.value;
+                      setAnnouncements(next);
+                    }}
+                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setAnnouncements(announcements.filter((_, j) => j !== i))}
+                    className="rounded-md border border-stone-200 px-2 py-2 text-xs text-stone-500 hover:border-red-300 hover:text-red-600 transition-colors"
+                  >
+                    {t(lang, "announcement_remove_btn")}
+                  </button>
+                </div>
+                <p className={`text-xs text-right ${text.length > 110 ? "text-amber-600" : "text-stone-400"}`}>
+                  {text.length}/120
+                </p>
+              </div>
+            ))}
+
+            {announcements.length < 5 ? (
+              <button
+                type="button"
+                onClick={() => setAnnouncements([...announcements, ""])}
+                className="self-start rounded-md border border-dashed border-stone-300 px-3 py-2 text-sm text-stone-500 hover:border-stone-400 hover:text-stone-700 transition-colors"
+              >
+                + {t(lang, "announcement_add_btn")}
+              </button>
+            ) : (
+              <p className="text-xs text-stone-500">{t(lang, "announcement_max_reached")}</p>
+            )}
+          </div>
         </div>
-      </div>
 
-      <hr className="border-stone-200" />
+        <hr className="border-stone-200" />
 
-      {/* Product sort default */}
-      <div className="flex flex-col gap-2">
-        <label htmlFor="product_sort_default" className="text-sm font-medium">{t(lang, "product_sort_label")}</label>
-        <p className="text-xs text-stone-500">{t(lang, "product_sort_desc")}</p>
-        <select
-          id="product_sort_default"
-          name="product_sort_default"
-          value={selectedSort}
-          onChange={(e) => setSelectedSort(e.target.value as StoreSortOption)}
-          className="max-w-xs rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
-        >
-          {STORE_SORT_OPTIONS.map((opt) => (
-            <option key={opt} value={opt}>
-              {t(lang, `sort_${opt}` as Parameters<typeof t>[1])}
-            </option>
-          ))}
-        </select>
+        {/* Product sort default */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="product_sort_default" className="text-sm font-medium">{t(lang, "product_sort_label")}</label>
+          <p className="text-xs text-stone-500">{t(lang, "product_sort_desc")}</p>
+          <select
+            id="product_sort_default"
+            name="product_sort_default"
+            value={selectedSort}
+            onChange={(e) => setSelectedSort(e.target.value as StoreSortOption)}
+            className="max-w-xs rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-2 focus:outline-[var(--store-primary)]"
+          >
+            {STORE_SORT_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {t(lang, `sort_${opt}` as Parameters<typeof t>[1])}
+              </option>
+            ))}
+          </select>
+        </div>
+
       </div>
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
@@ -444,3 +479,5 @@ export function AppearanceForm({
     </form>
   );
 }
+
+

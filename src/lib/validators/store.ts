@@ -1,4 +1,4 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 import { DEFAULT_THEME_COLOR, STORE_BACKGROUND_TYPES, STORE_FONTS, PRESET_BACKGROUNDS, STORE_BUTTON_SHAPES, STORE_CARD_STYLES, STORE_SORT_OPTIONS } from "@/lib/theme";
 
 const STORE_LANGUAGE_VALUES = ["en", "ar"] as const;
@@ -75,6 +75,7 @@ export const storeAppearanceSchema = z
     product_card_style: z.enum(STORE_CARD_STYLES).default("grid"),
     products_per_row: z.coerce.number().int().min(2).max(4).default(3),
     announcement_active: z.coerce.boolean().default(false),
+    announcement_color: hexColorSchema.default("#000000"),
     announcement_texts: z.array(
       z.string().trim()
         .min(1, "Announcement cannot be empty")
@@ -103,6 +104,7 @@ export const storeAppearanceSchema = z
       product_card_style: data.product_card_style,
       products_per_row: data.products_per_row,
       announcement_active: data.announcement_active,
+      announcement_color: data.announcement_color,
       announcement_texts: data.announcement_texts,
       product_sort_default: data.product_sort_default,
     };
@@ -167,3 +169,4 @@ export const categorySchema = z.object({
 export type StoreInput = z.infer<typeof storeSchema>;
 export type ProductInput = z.infer<typeof productSchema>;
 export type CategoryInput = z.infer<typeof categorySchema>;
+

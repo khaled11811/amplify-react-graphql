@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -33,6 +33,7 @@ export async function updateStoreAppearance(
     product_card_style: formData.get("product_card_style") || undefined,
     products_per_row: formData.get("products_per_row") || undefined,
     announcement_active: formData.get("announcement_active") === "true",
+    announcement_color: (formData.get("announcement_color") as string) || "#000000",
     announcement_texts: JSON.parse((formData.get("announcement_texts") as string) || "[]"),
     product_sort_default: formData.get("product_sort_default") || undefined,
   });
@@ -56,6 +57,7 @@ export async function updateStoreAppearance(
       product_card_style: parsed.data.product_card_style,
       products_per_row: parsed.data.products_per_row,
       announcement_active: parsed.data.announcement_active,
+      announcement_color: parsed.data.announcement_color,
       announcement_texts: parsed.data.announcement_texts,
       product_sort_default: parsed.data.product_sort_default,
     })
@@ -247,3 +249,5 @@ export async function updateBillingInfo(
   revalidatePath("/dashboard/settings/billing");
   return { success: true };
 }
+
+

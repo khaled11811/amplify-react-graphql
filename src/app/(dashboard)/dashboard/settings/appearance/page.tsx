@@ -1,4 +1,4 @@
-import { getCurrentProfile } from "@/lib/data/auth";
+﻿import { getCurrentProfile } from "@/lib/data/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getLang } from "@/lib/i18n/server";
 import { t, type Lang } from "@/lib/i18n/translations";
@@ -48,6 +48,7 @@ export default async function AppearanceSettingsPage() {
         productCardStyle={store.product_card_style ?? "grid"}
         productsPerRow={store.products_per_row ?? 3}
         announcementTexts={store.announcement_texts ?? []}
+        announcementColor={store.announcement_color ?? "#000000"}
         announcementActive={store.announcement_active ?? false}
         productSortDefault={store.product_sort_default ?? "newest"}
         storeLang={(store.store_language === "ar" ? "ar" : "en") as Lang}
@@ -62,3 +63,4 @@ export default async function AppearanceSettingsPage() {
     </div>
   );
 }
+
